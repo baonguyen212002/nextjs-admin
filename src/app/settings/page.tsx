@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Cog, Palette } from 'lucide-react'; // Removed Users icon
+import { Settings, Cog, Palette } from 'lucide-react'; 
 import Link from 'next/link';
 
 function QuickLinkButton({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
@@ -32,7 +32,6 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <QuickLinkButton href="/settings/general" label="General Settings" icon={Cog} />
-          {/* User Management QuickLinkButton removed */}
           <QuickLinkButton href="/settings/appearance" label="Appearance" icon={Palette} />
           {/* Add more settings links here as needed */}
         </CardContent>
