@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
-import './globals.css'; // Assuming globals.css is now relative to [locale] or path is adjusted. Let's assume it's okay.
+import '../globals.css'; // Corrected path
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppHeader from '@/components/layout/app-header';

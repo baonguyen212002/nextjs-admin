@@ -126,7 +126,7 @@ const LiveClock = () => {
 export default function AppHeader() {
   const { isMobile } = useSidebar();
   const t = useTranslations('AppHeader');
-  const [siteName, setSiteName] = useState(t('adminDashboardTitle')); // Initialize with translated fallback
+  const [siteName, setSiteName] = useState(t('adminDashboardTitle')); 
 
   useEffect(() => {
      const getStoredSiteName = () => {
@@ -142,7 +142,6 @@ export default function AppHeader() {
       if (customEvent.detail && customEvent.detail.siteName) {
         setSiteName(customEvent.detail.siteName);
       } else {
-        // If siteName is cleared from settings, revert to translated default
         setSiteName(localStorage.getItem('appSiteName') || t('adminDashboardTitle'));
       }
     };
@@ -154,7 +153,7 @@ export default function AppHeader() {
         window.removeEventListener('settingsChanged', handleSettingsChange);
       }
     };
-  }, [t]); // Add t to dependency array
+  }, [t]); 
 
 
   return (
