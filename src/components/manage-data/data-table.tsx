@@ -155,12 +155,19 @@ export default function DataTable() {
           }
         }}>
           <DialogContent className="sm:max-w-2xl">
-            {/* DataForm is rendered inside the DialogContent by parent page if this component is not managing its own Dialog */}
-            {/* This is a common pattern, or manage Dialog state here */}
+            <DialogHeader>
+              <DialogTitle>{selectedItem ? 'Edit Item' : 'Create New Item'}</DialogTitle>
+              <DialogDescription>
+                {selectedItem 
+                  ? `Update details for ${selectedItem.name}.` 
+                  : 'Fill in the details for the new item.'}
+              </DialogDescription>
+            </DialogHeader>
              <DataForm 
                 item={selectedItem} 
                 onFormSubmit={handleFormSubmit}
                 onCancel={() => { setIsFormOpen(false); setSelectedItem(null); }}
+                embeddedInDialog={true}
               />
           </DialogContent>
         </Dialog>
