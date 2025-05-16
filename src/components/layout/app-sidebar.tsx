@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -9,6 +10,7 @@ import {
   Settings,
   LifeBuoy,
   Power,
+  Users, // Added Users icon
 } from 'lucide-react';
 import {
   Sidebar,
@@ -19,13 +21,14 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
-} from '@/components/ui/sidebar'; // Adjusted to use new Sidebar component structure
+} from '@/components/ui/sidebar'; 
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/manage-data', label: 'Manage Data', icon: Database },
   { href: '/upload-items', label: 'Upload Items', icon: UploadCloud },
+  { href: '/settings/users', label: 'User Management', icon: Users }, // Added User Management link
 ];
 
 const bottomNavItems = [
@@ -49,11 +52,11 @@ export default function AppSidebar() {
               <Link href={item.href} legacyBehavior passHref>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={pathname === item.href || (item.href === '/settings/users' && pathname.startsWith('/settings/users'))}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className={cn(
                     'w-full justify-start',
-                    pathname === item.href && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    (pathname === item.href || (item.href === '/settings/users' && pathname.startsWith('/settings/users'))) && 'bg-sidebar-accent text-sidebar-accent-foreground'
                   )}
                 >
                   <a>
@@ -74,11 +77,11 @@ export default function AppSidebar() {
                <Link href={item.href} legacyBehavior passHref>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings'))}
                     tooltip={{ children: item.label, side: 'right', align: 'center' }}
                     className={cn(
                     'w-full justify-start',
-                    pathname === item.href && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    (pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings') && !pathname.startsWith('/settings/users'))) && 'bg-sidebar-accent text-sidebar-accent-foreground'
                   )}
                   >
                     <a>
