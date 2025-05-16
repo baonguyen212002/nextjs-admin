@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
-import { Edit3, KeyRound, UserCircle, UserCog, Save } from 'lucide-react';
+import { Edit3, KeyRound, UserCircle, UserCog, Save, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
@@ -20,16 +20,14 @@ import { z } from 'zod';
 import type { User } from '@/types';
 import { updateUserProfileAction } from '@/lib/actions';
 
-
-// Initial mock user data - this will be the starting point for our state
-const initialMockUser: User = {
-  id: 'usr_1', // Assuming this is the current logged-in user for demo
+// Static parts of the mock user, lastLogin will be generated client-side
+const staticMockUserDetails: Omit<User, 'lastLogin'> = {
+  id: 'usr_1',
   name: 'Admin User',
   email: 'admin@example.com',
   avatarUrl: 'https://placehold.co/128x128.png',
   role: 'Administrator',
   status: 'Active',
-  lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
 };
 
 const profileFormSchema = z.object({
@@ -39,26 +37,39 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
-  const tForm = useTranslations('ProfileEditForm'); // Namespace for form translations
+  const tForm = useTranslations('ProfileEditForm');
   const { toast } = useToast();
-  const [currentUser, setCurrentUser] = useState<User>(initialMockUser);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: currentUser.name,
+      name: '', // Initial safe default
     },
   });
 
-  // Reset form when currentUser changes (e.g. after successful update or if dialog is reopened)
   useEffect(() => {
-    form.reset({ name: currentUser.name });
+    // This effect runs only on the client, after initial hydration
+    const clientGeneratedLastLogin = new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(); // 3 hours ago
+    setCurrentUser({
+      ...staticMockUserDetails,
+      lastLogin: clientGeneratedLastLogin,
+    });
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  // Reset form when currentUser becomes available or dialog is reopened
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({ name: currentUser.name });
+    }
   }, [currentUser, form, isEditModalOpen]);
 
 
   const handleEditProfileSubmit = async (values: ProfileFormValues) => {
+    if (!currentUser) return; // Should not happen if button is disabled while loading
+
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('name', values.name);
@@ -85,6 +96,14 @@ export default function ProfilePage() {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 text-lg text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -193,7 +212,6 @@ export default function ProfilePage() {
                   </FormItem>
                 )}
               />
-              {/* Add other editable fields here later, e.g., email */}
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline">{tForm('cancelButton')}</Button>
