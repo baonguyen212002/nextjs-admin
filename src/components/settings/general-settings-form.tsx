@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next-intl/navigation'; // Corrected import for App Router
+import { useRouter, usePathname, Link } from '@/i18n/navigation';
 
 const generalSettingsSchema = z.object({
   siteName: z.string().min(3, { message: 'Site name must be at least 3 characters.' }),

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Link, usePathname, useRouter } from 'next-intl/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { Bell, UserCircle, Sun, Moon, Menu, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -142,6 +142,7 @@ export default function AppHeader() {
       if (customEvent.detail && customEvent.detail.siteName) {
         setSiteName(customEvent.detail.siteName);
       } else {
+        // If siteName is not in detail, re-fetch from localStorage or default
         setSiteName(localStorage.getItem('appSiteName') || t('adminDashboardTitle'));
       }
     };
@@ -153,7 +154,7 @@ export default function AppHeader() {
         window.removeEventListener('settingsChanged', handleSettingsChange);
       }
     };
-  }, [t]); 
+  }, [t]); // t is included to re-evaluate default if language changes
 
 
   return (
@@ -181,7 +182,7 @@ export default function AppHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{t('myAccountDropdown')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild><Link href="/settings/general">{t('profileDropdown')}</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/settings/profile">{t('profileDropdown')}</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link href="/settings">{t('settingsDropdown')}</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>{t('logoutDropdown')}</DropdownMenuItem>

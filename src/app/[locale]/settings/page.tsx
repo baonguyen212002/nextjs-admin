@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Cog, Palette } from 'lucide-react'; 
-import { Link } from 'next-intl/navigation'; 
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 
