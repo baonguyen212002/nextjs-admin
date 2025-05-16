@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next-intl/client'; // Use next-intl's navigation
+import { useRouter, usePathname } from 'next-intl/navigation'; // Corrected import for App Router
 
 const generalSettingsSchema = z.object({
   siteName: z.string().min(3, { message: 'Site name must be at least 3 characters.' }),
@@ -60,7 +60,7 @@ const timezones = [
   { value: 'Atlantic/Azores', label: 'GMT-01:00 Azores' },
   { value: 'Europe/London', label: 'GMT+00:00 London, Dublin, Lisbon' },
   { value: 'Europe/Paris', label: 'GMT+01:00 Paris, Berlin, Rome, Madrid' },
-  { value: 'Europe/Istanbul', label: 'GMT+02:00 Istanbul, Athens, Helsinki' }, // Corrected from Europe/Istabul
+  { value: 'Europe/Istanbul', label: 'GMT+02:00 Istanbul, Athens, Helsinki' },
   { value: 'Europe/Moscow', label: 'GMT+03:00 Moscow, St. Petersburg' },
   { value: 'Asia/Dubai', label: 'GMT+04:00 Abu Dhabi, Muscat' },
   { value: 'Asia/Kolkata', label: 'GMT+05:30 Chennai, Kolkata, Mumbai, New Delhi' },
@@ -81,10 +81,9 @@ export default function GeneralSettingsForm() {
   const pathname = usePathname(); // Unlocalized pathname, e.g. /settings/general
   const currentLocale = useLocale(); // Current active locale, e.g. 'en'
 
-  // Base default settings, using translated fallback for siteName if needed
   const baseSettings = {
-    siteName: t('siteNameLabel'), // This is just for initial state, localStorage will override
-    defaultLanguage: currentLocale, // Default to current active locale
+    siteName: t('siteNameLabel'), 
+    defaultLanguage: currentLocale, 
     timezone: 'Etc/UTC',
   };
   
@@ -94,14 +93,12 @@ export default function GeneralSettingsForm() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedSiteName = localStorage.getItem('appSiteName');
-      // Language preference from localStorage is now mainly for middleware's initial choice
-      // The form should reflect the *current* URL's locale for its language selection by default
       const storedLanguage = localStorage.getItem('appLanguage') || currentLocale; 
       const storedTimezone = localStorage.getItem('appTimezone');
       
       const loadedSettings = { 
-        siteName: storedSiteName || t('siteNameLabel'), // Fallback placeholder
-        defaultLanguage: storedLanguage, // Or use currentLocale directly
+        siteName: storedSiteName || t('siteNameLabel'),
+        defaultLanguage: storedLanguage, 
         timezone: storedTimezone || 'Etc/UTC',
        };
       setInitialFormValues(loadedSettings);
@@ -118,7 +115,6 @@ export default function GeneralSettingsForm() {
   }, [initialFormValues, form]);
 
   async function onSubmit(values: GeneralSettingsFormValues) {
-    // In a real app, you would call a server action here to save the settings
     console.log('General Settings Submitted:', values);
     
     let languageChanged = false;
@@ -127,7 +123,7 @@ export default function GeneralSettingsForm() {
         languageChanged = true;
       }
       localStorage.setItem('appSiteName', values.siteName);
-      localStorage.setItem('appLanguage', values.defaultLanguage); // Store user's preferred language
+      localStorage.setItem('appLanguage', values.defaultLanguage);
       localStorage.setItem('appTimezone', values.timezone);
       window.dispatchEvent(new CustomEvent('settingsChanged', { detail: values }));
     }
@@ -139,9 +135,7 @@ export default function GeneralSettingsForm() {
       description: t('settingsSavedToastDescription'),
     });
 
-    // If language changed, redirect to the same page but with the new locale
     if (languageChanged) {
-      // pathname is the unlocalized path, e.g., /settings/general
       router.push(pathname, {locale: values.defaultLanguage});
     }
   }
