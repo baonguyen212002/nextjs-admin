@@ -16,3 +16,13 @@ export interface Metric {
   change?: string;
   changeType?: 'positive' | 'negative';
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'editor' | 'viewer';
+  status: 'active' | 'invited' | 'disabled';
+  lastLogin: string; // ISO date string
+  avatarUrl?: string;
+}
