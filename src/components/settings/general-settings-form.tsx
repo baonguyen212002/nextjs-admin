@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const generalSettingsSchema = z.object({
   siteName: z.string().min(3, { message: 'Site name must be at least 3 characters.' }),
@@ -32,11 +33,11 @@ const generalSettingsSchema = z.object({
 
 type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
 
-// Mock current settings - in a real app, these would be fetched
-const currentSettings = {
+// Base default settings
+const baseSettings = {
   siteName: 'Admin Dashboard',
   defaultLanguage: 'en',
-  timezone: 'America/New_York',
+  timezone: 'Etc/UTC', // Default to UTC if nothing else is set
 };
 
 const languages = [
@@ -55,27 +56,61 @@ const timezones = [
   { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
   { value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
   { value: 'Europe/Berlin', label: 'Central European Time (CET)' },
+  { value: 'Asia/Ho_Chi_Minh', label: 'Indochina Time (Ho Chi Minh City)'},
 ];
 
 export default function GeneralSettingsForm() {
   const { toast } = useToast();
+  const [initialFormValues, setInitialFormValues] = useState(baseSettings);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedSiteName = localStorage.getItem('appSiteName');
+      const storedLanguage = localStorage.getItem('appLanguage');
+      const storedTimezone = localStorage.getItem('appTimezone');
+      
+      const loadedSettings = { ...baseSettings };
+      if (storedSiteName) {
+        loadedSettings.siteName = storedSiteName;
+      }
+      if (storedLanguage && languages.some(lang => lang.value === storedLanguage)) {
+        loadedSettings.defaultLanguage = storedLanguage;
+      }
+      if (storedTimezone && timezones.some(tz => tz.value === storedTimezone)) {
+        loadedSettings.timezone = storedTimezone;
+      }
+      setInitialFormValues(loadedSettings);
+    }
+  }, []);
+
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsSchema),
-    defaultValues: currentSettings, // Load current settings into the form
+    defaultValues: initialFormValues, // Initialize with baseSettings, will be updated by useEffect
   });
+
+  useEffect(() => {
+    // Update form values if initialFormValues changes (e.g., after loading from localStorage)
+    form.reset(initialFormValues);
+  }, [initialFormValues, form]);
 
   async function onSubmit(values: GeneralSettingsFormValues) {
     // In a real app, you would call a server action here to save the settings
     console.log('General Settings Submitted:', values);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('appSiteName', values.siteName);
+      localStorage.setItem('appLanguage', values.defaultLanguage);
+      localStorage.setItem('appTimezone', values.timezone);
+      window.dispatchEvent(new CustomEvent('settingsChanged', { detail: values }));
+    }
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     toast({
       title: 'Settings Saved!',
-      description: 'Your general settings have been updated (simulated).',
+      description: 'Your general settings have been updated and stored locally.',
     });
-    // Optionally update currentSettings or re-fetch if data persistence was real
   }
 
   return (
@@ -100,7 +135,7 @@ export default function GeneralSettingsForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Default Language</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.defaultLanguage}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select default language" />
@@ -124,7 +159,7 @@ export default function GeneralSettingsForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Timezone</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.timezone}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select timezone" />

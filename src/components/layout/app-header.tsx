@@ -53,14 +53,43 @@ const ThemeToggle = () => {
 
 const LiveClock = () => {
   const [currentTime, setCurrentTime] = useState<string | null>(null);
+  const [currentTimezone, setCurrentTimezone] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    const getStoredTimezone = () => {
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('appTimezone') || 'Etc/UTC'; // Default to UTC if not set
+      }
+      return 'Etc/UTC';
+    };
+
+    setCurrentTimezone(getStoredTimezone());
+
+    const handleSettingsChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ timezone?: string }>;
+      if (customEvent.detail && customEvent.detail.timezone) {
+        setCurrentTimezone(customEvent.detail.timezone);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('settingsChanged', handleSettingsChange);
+    }
+    
+    // Set initial time
+    setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: getStoredTimezone() }));
+
     const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
+      setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: currentTimezone }));
     }, 1000);
-    setCurrentTime(new Date().toLocaleTimeString()); // Initial set
-    return () => clearInterval(timer);
-  }, []);
+
+    return () => {
+      clearInterval(timer);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('settingsChanged', handleSettingsChange);
+      }
+    };
+  }, [currentTimezone]); // Re-run effect if currentTimezone changes
 
   if (currentTime === null) {
     return (
@@ -82,13 +111,40 @@ const LiveClock = () => {
 
 export default function AppHeader() {
   const { isMobile } = useSidebar();
+  const [siteName, setSiteName] = useState('Admin Dashboard');
+
+  useEffect(() => {
+     const getStoredSiteName = () => {
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('appSiteName') || 'Admin Dashboard';
+      }
+      return 'Admin Dashboard';
+    };
+    setSiteName(getStoredSiteName());
+
+    const handleSettingsChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ siteName?: string }>;
+      if (customEvent.detail && customEvent.detail.siteName) {
+        setSiteName(customEvent.detail.siteName);
+      }
+    };
+     if (typeof window !== 'undefined') {
+      window.addEventListener('settingsChanged', handleSettingsChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('settingsChanged', handleSettingsChange);
+      }
+    };
+  }, []);
+
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6 lg:px-8 shadow-sm">
       <div className="flex items-center gap-4">
         {isMobile && <SidebarTrigger><Menu className="h-6 w-6" /></SidebarTrigger>}
         <Link href="/" className="text-xl font-bold text-primary">
-          Admin Dashboard
+          {siteName}
         </Link>
       </div>
       <div className="flex items-center gap-3">
@@ -108,8 +164,8 @@ export default function AppHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/settings/general">Profile</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Logout</DropdownMenuItem>
           </DropdownMenuContent>
@@ -118,3 +174,4 @@ export default function AppHeader() {
     </header>
   );
 }
+
