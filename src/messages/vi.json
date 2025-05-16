@@ -1,0 +1,69 @@
+{
+  "AppHeader": {
+    "adminDashboardTitle": "Trang quản trị",
+    "notificationsLabel": "Thông báo",
+    "userMenuLabel": "Menu người dùng",
+    "myAccountDropdown": "Tài khoản của tôi",
+    "profileDropdown": "Hồ sơ",
+    "settingsDropdown": "Cài đặt",
+    "logoutDropdown": "Đăng xuất",
+    "liveClockLoading": "Đang tải giờ..."
+  },
+  "AppSidebar": {
+    "dashboard": "Bảng điều khiển",
+    "manageData": "Quản lý dữ liệu",
+    "uploadItems": "Tải lên mục",
+    "userManagement": "Quản lý người dùng",
+    "settings": "Cài đặt",
+    "support": "Hỗ trợ",
+    "logout": "Đăng xuất",
+    "toggleSidebarTooltip": "Chuyển đổi thanh bên"
+  },
+  "GeneralSettingsForm": {
+    "siteNameLabel": "Tên trang web",
+    "defaultLanguageLabel": "Ngôn ngữ mặc định",
+    "timezoneLabel": "Múi giờ",
+    "saveSettingsButton": "Lưu cài đặt",
+    "savingSettingsButton": "Đang lưu...",
+    "settingsSavedToastTitle": "Đã lưu cài đặt!",
+    "settingsSavedToastDescription": "Cài đặt chung của bạn đã được cập nhật và lưu trữ cục bộ."
+  },
+  "GeneralSettingsPage": {
+    "title": "Cài đặt chung",
+    "description": "Quản lý các cài đặt chung của ứng dụng, chẳng hạn như tên trang web, ngôn ngữ mặc định và múi giờ."
+  },
+  "AppearanceSettingsPage": {
+    "title": "Cài đặt giao diện",
+    "description": "Tùy chỉnh giao diện và cảm nhận của ứng dụng, bao gồm chủ đề, màu sắc và tùy chọn bố cục."
+  },
+  "UserManagementPage": {
+    "title": "Quản lý người dùng",
+    "description": "Quản lý tất cả người dùng trong hệ thống. Bạn có thể thêm, chỉnh sửa và xóa tài khoản người dùng."
+  },
+  "SettingsPage": {
+    "title": "Cài đặt ứng dụng",
+    "description": "Quản lý các cài đặt khác nhau cho ứng dụng của bạn.",
+    "generalSettingsLink": "Cài đặt chung",
+    "appearanceSettingsLink": "Giao diện"
+  },
+  "UploadItemsPage": {
+    "title": "Tải lên mục mới",
+    "description": "Cung cấp chi tiết mục và chọn một tệp để tải lên. Kích thước tệp tối đa: 5MB."
+  },
+  "ManageDataPage": {
+    "title": "Quản lý dữ liệu",
+    "description": "Xem, tạo, chỉnh sửa và xóa các mục dữ liệu trong hệ thống của bạn."
+  },
+  "DashboardPage": {
+    "welcomeBannerTitle": "Chào mừng trở lại, Quản trị viên!",
+    "welcomeBannerMessage": "Đây là bản tóm tắt hoạt động gần đây. Bạn có 3 nhiệm vụ mới cần chú ý.",
+    "recentActivitiesTitle": "Hoạt động gần đây",
+    "recentActivitiesDescription": "Những gì đã xảy ra trong hệ thống.",
+    "quickLinksTitle": "Liên kết nhanh",
+    "quickLinksDescription": "Các hành động và tài nguyên thường được sử dụng.",
+    "manageAllDataLink": "Quản lý tất cả dữ liệu",
+    "uploadNewItemLink": "Tải lên mục mới",
+    "userManagementLink": "Quản lý người dùng",
+    "viewReportsLink": "Xem báo cáo"
+  }
+}

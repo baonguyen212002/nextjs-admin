@@ -24,6 +24,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next-intl/client'; // Use next-intl's navigation
 
 const generalSettingsSchema = z.object({
   siteName: z.string().min(3, { message: 'Site name must be at least 3 characters.' }),
@@ -32,13 +34,6 @@ const generalSettingsSchema = z.object({
 });
 
 type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
-
-// Base default settings
-const baseSettings = {
-  siteName: 'Admin Dashboard',
-  defaultLanguage: 'en',
-  timezone: 'Etc/UTC', // Default to UTC if nothing else is set
-};
 
 const languages = [
   { value: 'en', label: 'English' },
@@ -65,7 +60,7 @@ const timezones = [
   { value: 'Atlantic/Azores', label: 'GMT-01:00 Azores' },
   { value: 'Europe/London', label: 'GMT+00:00 London, Dublin, Lisbon' },
   { value: 'Europe/Paris', label: 'GMT+01:00 Paris, Berlin, Rome, Madrid' },
-  { value: 'Europe/Istanbul', label: 'GMT+02:00 Istanbul, Athens, Helsinki' },
+  { value: 'Europe/Istanbul', label: 'GMT+02:00 Istanbul, Athens, Helsinki' }, // Corrected from Europe/Istabul
   { value: 'Europe/Moscow', label: 'GMT+03:00 Moscow, St. Petersburg' },
   { value: 'Asia/Dubai', label: 'GMT+04:00 Abu Dhabi, Muscat' },
   { value: 'Asia/Kolkata', label: 'GMT+05:30 Chennai, Kolkata, Mumbai, New Delhi' },
@@ -78,37 +73,47 @@ const timezones = [
   { value: 'Pacific/Auckland', label: 'GMT+12:00 Auckland, Wellington' },
 ];
 
+
 export default function GeneralSettingsForm() {
+  const t = useTranslations('GeneralSettingsForm');
   const { toast } = useToast();
+  const router = useRouter();
+  const pathname = usePathname(); // Unlocalized pathname, e.g. /settings/general
+  const currentLocale = useLocale(); // Current active locale, e.g. 'en'
+
+  // Base default settings, using translated fallback for siteName if needed
+  const baseSettings = {
+    siteName: t('siteNameLabel'), // This is just for initial state, localStorage will override
+    defaultLanguage: currentLocale, // Default to current active locale
+    timezone: 'Etc/UTC',
+  };
+  
   const [initialFormValues, setInitialFormValues] = useState(baseSettings);
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedSiteName = localStorage.getItem('appSiteName');
-      const storedLanguage = localStorage.getItem('appLanguage');
+      // Language preference from localStorage is now mainly for middleware's initial choice
+      // The form should reflect the *current* URL's locale for its language selection by default
+      const storedLanguage = localStorage.getItem('appLanguage') || currentLocale; 
       const storedTimezone = localStorage.getItem('appTimezone');
       
-      const loadedSettings = { ...baseSettings };
-      if (storedSiteName) {
-        loadedSettings.siteName = storedSiteName;
-      }
-      if (storedLanguage && languages.some(lang => lang.value === storedLanguage)) {
-        loadedSettings.defaultLanguage = storedLanguage;
-      }
-      if (storedTimezone && timezones.some(tz => tz.value === storedTimezone)) {
-        loadedSettings.timezone = storedTimezone;
-      }
+      const loadedSettings = { 
+        siteName: storedSiteName || t('siteNameLabel'), // Fallback placeholder
+        defaultLanguage: storedLanguage, // Or use currentLocale directly
+        timezone: storedTimezone || 'Etc/UTC',
+       };
       setInitialFormValues(loadedSettings);
     }
-  }, []);
+  }, [currentLocale, t]);
 
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsSchema),
-    defaultValues: initialFormValues, // Initialize with baseSettings, will be updated by useEffect
+    defaultValues: initialFormValues,
   });
 
   useEffect(() => {
-    // Update form values if initialFormValues changes (e.g., after loading from localStorage)
     form.reset(initialFormValues);
   }, [initialFormValues, form]);
 
@@ -116,20 +121,29 @@ export default function GeneralSettingsForm() {
     // In a real app, you would call a server action here to save the settings
     console.log('General Settings Submitted:', values);
     
+    let languageChanged = false;
     if (typeof window !== 'undefined') {
+      if (localStorage.getItem('appLanguage') !== values.defaultLanguage) {
+        languageChanged = true;
+      }
       localStorage.setItem('appSiteName', values.siteName);
-      localStorage.setItem('appLanguage', values.defaultLanguage);
+      localStorage.setItem('appLanguage', values.defaultLanguage); // Store user's preferred language
       localStorage.setItem('appTimezone', values.timezone);
       window.dispatchEvent(new CustomEvent('settingsChanged', { detail: values }));
     }
     
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     toast({
-      title: 'Settings Saved!',
-      description: 'Your general settings have been updated and stored locally.',
+      title: t('settingsSavedToastTitle'),
+      description: t('settingsSavedToastDescription'),
     });
+
+    // If language changed, redirect to the same page but with the new locale
+    if (languageChanged) {
+      // pathname is the unlocalized path, e.g., /settings/general
+      router.push(pathname, {locale: values.defaultLanguage});
+    }
   }
 
   return (
@@ -140,9 +154,9 @@ export default function GeneralSettingsForm() {
           name="siteName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Site Name</FormLabel>
+              <FormLabel>{t('siteNameLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder="Your Application Name" {...field} />
+                <Input placeholder={t('siteNameLabel')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,7 +167,7 @@ export default function GeneralSettingsForm() {
           name="defaultLanguage"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Default Language</FormLabel>
+              <FormLabel>{t('defaultLanguageLabel')}</FormLabel>
               <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.defaultLanguage}>
                 <FormControl>
                   <SelectTrigger>
@@ -177,7 +191,7 @@ export default function GeneralSettingsForm() {
           name="timezone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Timezone</FormLabel>
+              <FormLabel>{t('timezoneLabel')}</FormLabel>
               <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.timezone}>
                 <FormControl>
                   <SelectTrigger>
@@ -199,11 +213,11 @@ export default function GeneralSettingsForm() {
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
-              <>Saving...</>
+              <>{t('savingSettingsButton')}</>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Save Settings
+                {t('saveSettingsButton')}
               </>
             )}
           </Button>
@@ -212,4 +226,3 @@ export default function GeneralSettingsForm() {
     </Form>
   );
 }
-

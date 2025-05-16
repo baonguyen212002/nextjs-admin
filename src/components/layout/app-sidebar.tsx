@@ -1,8 +1,7 @@
 
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from 'next-intl/client'; // Using next-intl's Link and usePathname
 import {
   LayoutDashboard,
   Database,
@@ -10,7 +9,7 @@ import {
   Settings,
   LifeBuoy,
   Power,
-  Users, // Added Users icon
+  Users,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -23,39 +22,42 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/manage-data', label: 'Manage Data', icon: Database },
-  { href: '/upload-items', label: 'Upload Items', icon: UploadCloud },
-  { href: '/settings/users', label: 'User Management', icon: Users },
-];
-
-const bottomNavItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/support', label: 'Support', icon: LifeBuoy },
-];
+import { useTranslations } from 'next-intl';
 
 export default function AppSidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname(); // This will be the path without the locale, e.g., /dashboard
+  const t = useTranslations('AppSidebar');
+
+  const navItems = [
+    { href: '/', label: t('dashboard'), icon: LayoutDashboard },
+    { href: '/manage-data', label: t('manageData'), icon: Database },
+    { href: '/upload-items', label: t('uploadItems'), icon: UploadCloud },
+    { href: '/settings/users', label: t('userManagement'), icon: Users },
+  ];
+  
+  const bottomNavItems = [
+    { href: '/settings', label: t('settings'), icon: Settings },
+    { href: '/support', label: t('support'), icon: LifeBuoy },
+  ];
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         {/* Optional: Logo or App Name can go here if not in header for collapsed state */}
-        {/* <h1 className="text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden">Admin</h1> */}
       </SidebarHeader>
       <SidebarContent className="flex-grow">
         <SidebarMenu>
           {navItems.map((item) => {
+             // For active state, pathname from next-intl/client doesn't include locale.
+            // So, '/settings/users' will match if item.href is '/settings/users'.
             const isUserManagementLink = item.href === '/settings/users';
             const isLinkActive = isUserManagementLink
-              ? pathname.startsWith(item.href) // Active if path starts with /settings/users
-              : pathname === item.href;      // Active if path is an exact match for other items
+              ? pathname.startsWith(item.href) 
+              : pathname === item.href;
 
             return (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+                <Link href={item.href} passHref legacyBehavior={false}>
                   <SidebarMenuButton
                     asChild
                     isActive={isLinkActive}
@@ -65,10 +67,10 @@ export default function AppSidebar() {
                       isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
                     )}
                   >
-                    <a>
+                    <> {/* Ensure SidebarMenuButton receives a single child when asChild is true */}
                       <item.icon className="h-5 w-5" />
                       <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                    </a>
+                    </>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
@@ -81,13 +83,14 @@ export default function AppSidebar() {
         <SidebarMenu>
           {bottomNavItems.map((item) => {
             const isSettingsLink = item.href === '/settings';
+             // pathname from next-intl/client is unlocalized
             const isLinkActive = isSettingsLink
-              ? (pathname === item.href || (pathname.startsWith(item.href) && !pathname.startsWith('/settings/users')))
-              : pathname === item.href; // Exact match for other items like /support
+              ? (pathname === item.href || (pathname.startsWith(item.href + '/') && !pathname.startsWith('/settings/users')))
+              : pathname === item.href; 
 
             return (
                <SidebarMenuItem key={item.href}>
-                 <Link href={item.href} legacyBehavior passHref>
+                 <Link href={item.href} passHref legacyBehavior={false}>
                     <SidebarMenuButton
                       asChild
                       isActive={isLinkActive}
@@ -97,26 +100,26 @@ export default function AppSidebar() {
                         isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
                       )}
                     >
-                      <a>
+                      <>
                         <item.icon className="h-5 w-5" />
                         <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                      </a>
+                      </>
                     </SidebarMenuButton>
                  </Link>
                </SidebarMenuItem>
             );
           })}
           <SidebarMenuItem>
-             <Link href="/logout" legacyBehavior passHref>
+             <Link href="/logout" passHref legacyBehavior={false}> {/* Assuming /logout is not a localized route or handled differently */}
                 <SidebarMenuButton
                   asChild
-                  tooltip={{ children: "Logout", side: 'right', align: 'center' }}
+                  tooltip={{ children: t('logout'), side: 'right', align: 'center' }}
                   className="w-full justify-start hover:bg-destructive/20"
                 >
-                  <a>
+                  <>
                     <Power className="h-5 w-5 text-destructive" />
-                    <span className="group-data-[collapsible=icon]:hidden text-destructive">Logout</span>
-                  </a>
+                    <span className="group-data-[collapsible=icon]:hidden text-destructive">{t('logout')}</span>
+                  </>
                 </SidebarMenuButton>
              </Link>
            </SidebarMenuItem>

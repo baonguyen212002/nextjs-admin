@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure this path is correct if layout.tsx moves or adjust based on your build process.
+   Usually, global CSS imports in the root layout file handle this fine.
+   Let's assume the current pathing works or Next.js handles it.
+*/
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

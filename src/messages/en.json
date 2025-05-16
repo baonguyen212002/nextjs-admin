@@ -1,0 +1,69 @@
+{
+  "AppHeader": {
+    "adminDashboardTitle": "Admin Dashboard",
+    "notificationsLabel": "Notifications",
+    "userMenuLabel": "User menu",
+    "myAccountDropdown": "My Account",
+    "profileDropdown": "Profile",
+    "settingsDropdown": "Settings",
+    "logoutDropdown": "Logout",
+    "liveClockLoading": "Loading time..."
+  },
+  "AppSidebar": {
+    "dashboard": "Dashboard",
+    "manageData": "Manage Data",
+    "uploadItems": "Upload Items",
+    "userManagement": "User Management",
+    "settings": "Settings",
+    "support": "Support",
+    "logout": "Logout",
+    "toggleSidebarTooltip": "Toggle Sidebar"
+  },
+  "GeneralSettingsForm": {
+    "siteNameLabel": "Site Name",
+    "defaultLanguageLabel": "Default Language",
+    "timezoneLabel": "Timezone",
+    "saveSettingsButton": "Save Settings",
+    "savingSettingsButton": "Saving...",
+    "settingsSavedToastTitle": "Settings Saved!",
+    "settingsSavedToastDescription": "Your general settings have been updated and stored locally."
+  },
+  "GeneralSettingsPage": {
+    "title": "General Settings",
+    "description": "Manage general application settings, such as site name, default language, and timezone."
+  },
+  "AppearanceSettingsPage": {
+    "title": "Appearance Settings",
+    "description": "Customize the look and feel of your application, including theme, colors, and layout options."
+  },
+  "UserManagementPage": {
+    "title": "User Management",
+    "description": "Manage all users in the system. You can add, edit, and delete user accounts."
+  },
+  "SettingsPage": {
+    "title": "Application Settings",
+    "description": "Manage various settings for your application.",
+    "generalSettingsLink": "General Settings",
+    "appearanceSettingsLink": "Appearance"
+  },
+  "UploadItemsPage": {
+    "title": "Upload New Item",
+    "description": "Provide item details and select a file to upload. Max file size: 5MB."
+  },
+  "ManageDataPage": {
+    "title": "Manage Data",
+    "description": "View, create, edit, and delete data items in your system."
+  },
+  "DashboardPage": {
+    "welcomeBannerTitle": "Welcome Back, Admin!",
+    "welcomeBannerMessage": "Here's a summary of recent activity. You have 3 new tasks requiring your attention.",
+    "recentActivitiesTitle": "Recent Activities",
+    "recentActivitiesDescription": "What's been happening in the system.",
+    "quickLinksTitle": "Quick Links",
+    "quickLinksDescription": "Commonly used actions and resources.",
+    "manageAllDataLink": "Manage All Data",
+    "uploadNewItemLink": "Upload New Item",
+    "userManagementLink": "User Management",
+    "viewReportsLink": "View Reports"
+  }
+}

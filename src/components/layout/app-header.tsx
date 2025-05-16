@@ -1,7 +1,7 @@
 
 'use client';
 
-import Link from 'next/link';
+import { Link, usePathname, useRouter } from 'next-intl/client';
 import { Bell, UserCircle, Sun, Moon, Menu, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'; 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
 // A mock theme toggle - in a real app, this would integrate with a theme provider (e.g., next-themes)
 const ThemeToggle = () => {
@@ -52,6 +53,7 @@ const ThemeToggle = () => {
 };
 
 const LiveClock = () => {
+  const t = useTranslations('AppHeader');
   const [currentTime, setCurrentTime] = useState<string | null>(null);
   const [currentTimezone, setCurrentTimezone] = useState<string | undefined>(undefined);
 
@@ -77,10 +79,22 @@ const LiveClock = () => {
     }
     
     // Set initial time
-    setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: getStoredTimezone() }));
+    try {
+      setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: getStoredTimezone() }));
+    } catch (e) {
+      console.warn("Failed to set initial time with stored timezone, defaulting.", e);
+      setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: 'Etc/UTC' }));
+    }
+
 
     const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: currentTimezone }));
+      try {
+        setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: currentTimezone }));
+      } catch (e) {
+         // If timezone becomes invalid, fallback or log
+        console.warn("Error updating time with current timezone, falling back to UTC for this tick.", e, currentTimezone);
+        setCurrentTime(new Date().toLocaleTimeString(undefined, { timeZone: 'Etc/UTC' }));
+      }
     }, 1000);
 
     return () => {
@@ -95,7 +109,7 @@ const LiveClock = () => {
     return (
       <div className="flex items-center text-sm text-muted-foreground">
         <Clock className="mr-1 h-4 w-4" />
-        <span>--:--:--</span>
+        <span>{t('liveClockLoading')}</span>
       </div>
     );
   }
@@ -111,14 +125,15 @@ const LiveClock = () => {
 
 export default function AppHeader() {
   const { isMobile } = useSidebar();
-  const [siteName, setSiteName] = useState('Admin Dashboard');
+  const t = useTranslations('AppHeader');
+  const [siteName, setSiteName] = useState(t('adminDashboardTitle')); // Initialize with translated fallback
 
   useEffect(() => {
      const getStoredSiteName = () => {
       if (typeof window !== 'undefined') {
-        return localStorage.getItem('appSiteName') || 'Admin Dashboard';
+        return localStorage.getItem('appSiteName') || t('adminDashboardTitle');
       }
-      return 'Admin Dashboard';
+      return t('adminDashboardTitle');
     };
     setSiteName(getStoredSiteName());
 
@@ -126,6 +141,9 @@ export default function AppHeader() {
       const customEvent = event as CustomEvent<{ siteName?: string }>;
       if (customEvent.detail && customEvent.detail.siteName) {
         setSiteName(customEvent.detail.siteName);
+      } else {
+        // If siteName is cleared from settings, revert to translated default
+        setSiteName(localStorage.getItem('appSiteName') || t('adminDashboardTitle'));
       }
     };
      if (typeof window !== 'undefined') {
@@ -136,7 +154,7 @@ export default function AppHeader() {
         window.removeEventListener('settingsChanged', handleSettingsChange);
       }
     };
-  }, []);
+  }, [t]); // Add t to dependency array
 
 
   return (
@@ -150,28 +168,27 @@ export default function AppHeader() {
       <div className="flex items-center gap-3">
         <LiveClock />
         <ThemeToggle />
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        <Button variant="ghost" size="icon" aria-label={t('notificationsLabel')}>
           <Bell className="h-5 w-5 text-accent" />
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">{t('notificationsLabel')}</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full" aria-label={t('userMenuLabel')}>
               <UserCircle className="h-6 w-6" />
-              <span className="sr-only">User menu</span>
+              <span className="sr-only">{t('userMenuLabel')}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('myAccountDropdown')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild><Link href="/settings/general">Profile</Link></DropdownMenuItem>
-            <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/settings/general">{t('profileDropdown')}</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/settings">{t('settingsDropdown')}</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem>{t('logoutDropdown')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
   );
 }
-
