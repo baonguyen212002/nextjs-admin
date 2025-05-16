@@ -15,8 +15,8 @@ export default createMiddleware({
 export const config = {
   // Match only internationalized pathnames
   // Match all pathnames except for
-  // - … Knewen filenames (_next, locale, etc.)
-  // - … The root path (/)
+  // - … Known filenames (_next, locale, etc.)
+  // - … The root path (/) -- this was removed as per previous changes, let's re-evaluate
   // - … Static files (e.g. images, fonts, etc.)
   matcher: [
     // Match all pathnames except for
@@ -27,7 +27,9 @@ export const config = {
     // - … URLs starting with /images (public images, if you have them)
     // - … URLs starting with /fonts (public fonts, if you have them)
     '/((?!api|_next/static|_next/image|favicon.ico|images|fonts).*)',
-    // Match the root path specifically to redirect to /en or /vi
+    // Match the root path specifically to redirect to /en or /vi (if needed by your strategy)
+    // If you always want a locale prefix, the rule above might be enough
+    // But explicitly matching '/' ensures redirection from the bare domain.
     '/' 
   ]
 };
