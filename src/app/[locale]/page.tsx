@@ -1,11 +1,13 @@
 
+'use client'; // Mark as Client Component
+
 import MetricCard from '@/components/dashboard/metric-card';
 import PersonalizedBanner from '@/components/shared/personalized-banner';
 import type { Metric } from '@/types';
 import { Users, Package, DollarSign, Activity, ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { Link } from 'next-intl/navigation'; // Correct import for client components
+import { Link } from 'next-intl/navigation'; 
 import { useTranslations } from 'next-intl';
 
 const metrics: Metric[] = [
@@ -98,3 +100,4 @@ function QuickLinkButton({ href, label }: { href: string; label: string }) {
     </Link>
   );
 }
+

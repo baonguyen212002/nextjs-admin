@@ -7,7 +7,7 @@ import AppHeader from '@/components/layout/app-header';
 import AppSidebar from '@/components/layout/app-sidebar';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
-import {notFound} from 'next/navigation'; // Import notFound
+import {notFound} from 'next/navigation'; // Ensure notFound is imported
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,27 +15,39 @@ const geistSans = Geist({
 });
 
 export async function generateMetadata({params}: {params: {locale: string}}): Promise<Metadata> {
-  const { locale } = params;
-  // Basic validation, though middleware and i18n.ts should handle unsupported locales
-  if (!['en', 'vi'].includes(locale)) {
+  const currentLocale = params.locale; 
+
+  if (!['en', 'vi'].includes(currentLocale)) {
+    console.warn(`[next-intl] generateMetadata: Invalid locale "${currentLocale}" received. This should ideally be caught by middleware or i18n.ts.`);
+    // notFound(); // It's better to return minimal metadata or let the layout handle notFound for the page itself.
+                 // If notFound is called here, it might prevent the RootLayout from rendering properly.
     return {
-      title: 'Unsupported Locale',
-      description: 'This locale is not supported.',
+      title: 'Admin Dashboard (Locale Error)',
+      description: 'Invalid locale specified for metadata.',
+    };
+  }
+
+  let t;
+  try {
+    t = await getTranslations({locale: currentLocale, namespace: 'AppHeader'});
+  } catch (error) {
+    console.error(`[next-intl] Error in generateMetadata for locale ${currentLocale} (getTranslations):`, error);
+    return {
+      title: 'Admin Dashboard (Translation Error)',
+      description: 'Error loading translations for metadata.',
     };
   }
 
   try {
-    const t = await getTranslations({locale: params.locale, namespace: 'AppHeader'});
     return {
       title: t('adminDashboardTitle'),
-      description: t('adminDashboardTitle') // Or a more generic description
+      description: t('adminDashboardTitle') 
     };
   } catch (error) {
-    console.error(`[next-intl] Error in generateMetadata for locale ${params.locale}:`, error);
-    // Fallback metadata in case of error
-    return {
-      title: 'Admin Dashboard',
-      description: 'Error loading translations for metadata.',
+     console.error(`[next-intl] Error in generateMetadata for locale ${currentLocale} (using t()):`, error);
+     return {
+      title: 'Admin Dashboard (Usage Error)',
+      description: 'Error using translations in metadata.',
     };
   }
 }
@@ -47,35 +59,27 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: {locale: string};
 }>) {
+  const currentLocale = params.locale; 
   let messages;
-  try {
-    messages = await getMessages();
-  } catch (error) {
-    console.error(`[next-intl] Error in RootLayout calling getMessages() for locale ${params.locale}:`, error);
-    // If messages fail to load, treat as a critical error for this locale page.
-    // You could redirect to a generic error page or a default locale,
-    // but notFound() is appropriate if the localized page can't be rendered.
-    // However, if the error is "config not found", notFound() might hide the root cause.
-    // Let's provide empty messages to allow NextIntlClientProvider to initialize,
-    // to see if the "config not found" error from next-intl itself is the primary blocker.
-    messages = {}; 
-    // If the error persists as "config not found", it means getMessages() itself is failing
-    // due to next-intl not initializing, not just messages for a specific locale being absent.
+
+  if (!['en', 'vi'].includes(currentLocale)) {
+    console.warn(`[next-intl] RootLayout: Invalid locale "${currentLocale}" received. This should have been caught by middleware or i18n.ts. Calling notFound().`);
+    notFound();
   }
 
-  // If locale in params is somehow invalid despite middleware, i18n.ts should call notFound.
-  // We double check here for safety before passing to NextIntlClientProvider.
-  if (!['en', 'vi'].includes(params.locale)) {
-    console.warn(`[next-intl] RootLayout: Invalid locale "${params.locale}" received. This should have been caught by middleware or i18n.ts.`);
-    notFound();
+  try {
+    messages = await getMessages(); 
+  } catch (error) {
+    console.error(`[next-intl] Error in RootLayout for locale ${currentLocale} (getMessages):`, error);
+    messages = {}; 
   }
   
   return (
-    <html lang={params.locale} suppressHydrationWarning>
+    <html lang={currentLocale} suppressHydrationWarning>
       <body className={`${geistSans.variable} antialiased`}>
-        <NextIntlClientProvider locale={params.locale} messages={messages}>
+        <NextIntlClientProvider locale={currentLocale} messages={messages}>
           <SidebarProvider defaultOpen>
-            <AppSidebar messages={messages} locale={params.locale} />
+            <AppSidebar messages={messages} locale={currentLocale} />
             <div className="flex flex-col flex-1 min-h-screen">
               <AppHeader />
               <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
@@ -88,3 +92,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

@@ -1,13 +1,15 @@
 
+'use client'; // Mark as Client Component
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Cog, Palette } from 'lucide-react'; 
-import { Link } from 'next-intl/navigation'; // Use next-intl's Link
+import { Link } from 'next-intl/navigation'; 
 import { useTranslations } from 'next-intl';
 
 
 function QuickLinkButton({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
   return (
-    <Link // Use next-intl's Link if it exists, or ensure standard Link works with locale middleware
+    <Link 
       href={href}
       className="block p-6 rounded-lg border hover:bg-accent/10 hover:border-accent transition-all duration-200 shadow-sm text-center group"
     >
@@ -42,3 +44,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

@@ -1,4 +1,6 @@
 
+'use client'; // Mark as Client Component
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cog } from 'lucide-react';
 import GeneralSettingsForm from '@/components/settings/general-settings-form';
@@ -25,3 +27,4 @@ export default function GeneralSettingsPage() {
     </div>
   );
 }
+

@@ -1,3 +1,6 @@
+
+'use client'; // Mark as Client Component
+
 import DataTable from '@/components/manage-data/data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
@@ -20,3 +23,4 @@ export default function ManageDataPage() {
     </div>
   );
 }
+

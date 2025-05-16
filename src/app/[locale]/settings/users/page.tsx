@@ -1,3 +1,6 @@
+
+'use client'; // Mark as Client Component
+
 import UserTable from '@/components/users/user-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
@@ -24,3 +27,4 @@ export default function UserManagementPage() {
     </div>
   );
 }
+

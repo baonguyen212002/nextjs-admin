@@ -1,4 +1,6 @@
 
+'use client'; // Mark as Client Component
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -34,3 +36,4 @@ export default function AppearanceSettingsPage() {
     </div>
   );
 }
+
