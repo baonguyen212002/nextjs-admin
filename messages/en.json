@@ -45,7 +45,12 @@
   },
   "AppearanceSettingsPage": {
     "title": "Appearance Settings",
-    "description": "Customize the look and feel of your application, including theme, colors, and layout options."
+    "description": "Customize the look and feel of your application, including theme, colors, and layout options.",
+    "themeLabel": "Theme",
+    "themeDescription": "Select the color scheme for the application.",
+    "themeOptionLight": "Light",
+    "themeOptionDark": "Dark",
+    "themeOptionSystem": "System"
   },
   "UserManagementPage": {
     "title": "User Management",
@@ -102,6 +107,3 @@
     "updateErrorMessage": "Could not update profile. Please try again."
   }
 }
-
-
-    

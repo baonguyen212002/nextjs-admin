@@ -45,7 +45,12 @@
   },
   "AppearanceSettingsPage": {
     "title": "Cài đặt giao diện",
-    "description": "Tùy chỉnh giao diện và cảm nhận của ứng dụng, bao gồm chủ đề, màu sắc và tùy chọn bố cục."
+    "description": "Tùy chỉnh giao diện và cảm nhận của ứng dụng, bao gồm chủ đề, màu sắc và tùy chọn bố cục.",
+    "themeLabel": "Chủ đề",
+    "themeDescription": "Chọn bảng màu cho ứng dụng.",
+    "themeOptionLight": "Sáng",
+    "themeOptionDark": "Tối",
+    "themeOptionSystem": "Hệ thống"
   },
   "UserManagementPage": {
     "title": "Quản lý người dùng",
@@ -102,5 +107,3 @@
     "updateErrorMessage": "Không thể cập nhật hồ sơ. Vui lòng thử lại."
   }
 }
-
-    

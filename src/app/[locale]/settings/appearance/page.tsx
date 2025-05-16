@@ -1,12 +1,47 @@
 
-'use client'; // Mark as Client Component
+'use client'; 
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Palette } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+
+type Theme = 'light' | 'dark' | 'system';
 
 export default function AppearanceSettingsPage() {
   const t = useTranslations('AppearanceSettingsPage');
+  const [selectedTheme, setSelectedTheme] = useState<Theme>('system');
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme') as Theme | null;
+    if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
+      setSelectedTheme(storedTheme);
+    } else {
+      setSelectedTheme('system'); // Default to system if no valid theme is stored
+    }
+  }, []);
+
+  const applyTheme = (theme: Theme) => {
+    setSelectedTheme(theme);
+    if (theme === 'light') {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else { // System theme
+      localStorage.removeItem('theme');
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="shadow-xl">
@@ -21,19 +56,31 @@ export default function AppearanceSettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Here you can manage visual aspects of the application. This might include
-              options to switch between light and dark themes, select accent colors,
-              adjust font sizes, or configure layout preferences.
+            <h3 className="text-lg font-medium text-foreground">{t('themeLabel')}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t('themeDescription')}
             </p>
-            {/* Placeholder for actual form fields */}
-            <div className="p-8 border rounded-md bg-muted/50 text-center text-muted-foreground">
-              Appearance settings options (e.g., theme switcher, color pickers) will go here.
-            </div>
+            <RadioGroup
+              value={selectedTheme}
+              onValueChange={(value: Theme) => applyTheme(value)}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="light" id="theme-light" />
+                <Label htmlFor="theme-light" className="cursor-pointer flex-1">{t('themeOptionLight')}</Label>
+              </div>
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="dark" id="theme-dark" />
+                <Label htmlFor="theme-dark" className="cursor-pointer flex-1">{t('themeOptionDark')}</Label>
+              </div>
+              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="system" id="theme-system" />
+                <Label htmlFor="theme-system" className="cursor-pointer flex-1">{t('themeOptionSystem')}</Label>
+              </div>
+            </RadioGroup>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
