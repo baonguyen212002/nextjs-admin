@@ -3,6 +3,16 @@
   "AppHeader": {
     "adminDashboardTitle": "Admin Dashboard",
     "notificationsLabel": "Notifications",
+    "notificationsPopoverTitle": "Notifications",
+    "unreadNotificationLabel": "Unread",
+    "noNotificationsText": "No new notifications.",
+    "viewAllNotificationsLink": "View All Notifications",
+    "notificationUpdateTitle": "System Update Available",
+    "notificationUpdateMessage": "A new version of the dashboard software is ready to be installed.",
+    "notificationNewUserTitle": "New User Registered",
+    "notificationNewUserMessage": "John Doe has just signed up. Welcome them!",
+    "notificationAlertTitle": "Security Alert",
+    "notificationAlertMessage": "Unusual login activity detected on your account.",
     "userMenuLabel": "User menu",
     "myAccountDropdown": "My Account",
     "profileDropdown": "Profile",
@@ -92,5 +102,6 @@
     "updateErrorMessage": "Could not update profile. Please try again."
   }
 }
+
 
     
