@@ -22,7 +22,7 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
 
   if (!locales.includes(currentLocale)) {
     console.warn(`[next-intl] generateMetadata: Invalid locale "${currentLocale}" from params. Calling notFound().`);
-    notFound(); 
+    notFound();
   }
 
   let t;
@@ -36,17 +36,17 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
     return {
       title: 'Admin Dashboard (Translation Config Error)',
       description: 'Error loading translations for metadata due to config issue.',
-      icons: { 
+      icons: {
         icon: '/favicon.ico',
       }
     };
   }
 
   try {
-    const pageTitle = t('adminDashboardTitle'); 
+    const pageTitle = t('adminDashboardTitle');
     return {
       title: pageTitle,
-      description: pageTitle, 
+      description: pageTitle,
       icons: {
         icon: '/favicon.ico',
       }
@@ -74,37 +74,32 @@ export default async function LocaleLayout({
 
   if (!locales.includes(currentLocale)) {
     console.warn(`[next-intl] LocaleLayout: Invalid locale "${currentLocale}" from params. Calling notFound().`);
-    notFound(); 
+    notFound();
   }
 
   let messages;
   try {
     console.log(`[next-intl] LocaleLayout: Attempting to get messages for locale ${currentLocale}.`);
-    messages = await getMessages(); 
-    console.log(`[next-intl] LocaleLayout: Successfully got messages for locale ${currentLocale}. Message keys: ${Object.keys(messages || {}).join(', ')}`);
+    messages = await getMessages();
+    console.log(`[next-intl] LocaleLayout: Successfully got messages for locale ${currentLocale}. Message keys: ${Object.keys(messages || {}).length > 0 ? Object.keys(messages).slice(0,5).join(', ') + '...' : 'No keys'}`);
   } catch (error) {
     console.error(`[next-intl] Error in LocaleLayout for locale ${currentLocale} (getMessages):`, error);
-    // This is a critical error if next-intl config isn't found or message loading fails.
-    // Fallback to empty messages to allow the rest of the page to attempt rendering,
-    // but this indicates a fundamental problem with next-intl setup.
-    messages = {}; 
+    messages = {}; // Fallback to empty messages
   }
 
+  // The <html> and <body> tags are provided by the root layout (src/app/layout.tsx)
+  // This layout should only return the content for the body.
   return (
-    <html lang={currentLocale} suppressHydrationWarning>
-      <body className={`${geistSans.variable} antialiased`}>
-        <NextIntlClientProvider locale={currentLocale} messages={messages}>
-          <SidebarProvider defaultOpen>
-            <AppSidebar messages={messages} locale={currentLocale} />
-            <div className="flex flex-col flex-1 min-h-screen">
-              <AppHeader />
-              <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
-                {children}
-              </main>
-            </div>
-          </SidebarProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider locale={currentLocale} messages={messages}>
+      <SidebarProvider defaultOpen>
+        <AppSidebar messages={messages} locale={currentLocale} />
+        <div className="flex flex-col flex-1 min-h-screen">
+          <AppHeader />
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
+            {children}
+          </main>
+        </div>
+      </SidebarProvider>
+    </NextIntlClientProvider>
   );
 }
