@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -185,7 +186,9 @@ export default function DataTable() {
               )}
               <p><strong>ID:</strong> {itemToView.id}</p>
               <p><strong>Value:</strong> ${itemToView.value.toFixed(2)}</p>
-              <p><strong>Status:</strong> <Badge variant={getStatusBadgeVariant(itemToView.status)}>{itemToView.status}</Badge></p>
+              <div className="flex items-center">
+                <strong className="mr-1">Status:</strong> <Badge variant={getStatusBadgeVariant(itemToView.status)}>{itemToView.status}</Badge>
+              </div>
               <p><strong>Last Updated:</strong> {format(new Date(itemToView.lastUpdated), "PPP p")}</p>
               {itemToView.description && <p><strong>Description:</strong> {itemToView.description}</p>}
             </div>
