@@ -1,13 +1,12 @@
-
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import '../globals.css'; // Path relative to this file's new location
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppHeader from '@/components/layout/app-header';
 import AppSidebar from '@/components/layout/app-sidebar';
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages, getTranslations} from 'next-intl/server';
-import {notFound} from 'next/navigation'; // Ensure notFound is imported
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation'; // Ensure notFound is imported
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,28 +16,38 @@ const geistSans = Geist({
 // Supported locales - should match middleware.ts and i18n.ts
 const locales = ['en', 'vi'];
 
-export async function generateMetadata({params}: {params: {locale: string}}): Promise<Metadata> {
-  const currentLocale = params.locale;
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  // Await params before using
+  const { locale: currentLocale } = await params;
 
   if (!locales.includes(currentLocale)) {
-    console.warn(`[next-intl] generateMetadata: Invalid locale "${currentLocale}" from params. Calling notFound().`);
+    console.warn(
+      `[next-intl] generateMetadata: Invalid locale "${currentLocale}" from params. Calling notFound().`
+    );
     notFound();
   }
 
   let t;
   try {
-    console.log(`[next-intl] generateMetadata: Attempting to get translations for locale ${currentLocale}, namespace AppHeader.`);
-    t = await getTranslations({locale: currentLocale, namespace: 'AppHeader'});
-    console.log(`[next-intl] generateMetadata: Successfully got translations for locale ${currentLocale}, namespace AppHeader.`);
+    console.log(
+      `[next-intl] generateMetadata: Attempting to get translations for locale ${currentLocale}, namespace AppHeader.`
+    );
+    t = await getTranslations({ locale: currentLocale, namespace: 'AppHeader' });
+    console.log(
+      `[next-intl] generateMetadata: Successfully got translations for locale ${currentLocale}, namespace AppHeader.`
+    );
   } catch (error) {
-    console.error(`[next-intl] Error in generateMetadata for locale ${currentLocale} (getTranslations, AppHeader):`, error);
+    console.error(
+      `[next-intl] Error in generateMetadata for locale ${currentLocale} (getTranslations, AppHeader):`,
+      error
+    );
     // Fallback metadata if translations fail
     return {
       title: 'Admin Dashboard (Translation Config Error)',
       description: 'Error loading translations for metadata due to config issue.',
       icons: {
         icon: '/favicon.ico',
-      }
+      },
     };
   }
 
@@ -49,41 +58,57 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
       description: pageTitle,
       icons: {
         icon: '/favicon.ico',
-      }
+      },
     };
   } catch (error) {
-     console.error(`[next-intl] Error using translations in generateMetadata for locale ${currentLocale} (AppHeader namespace, key 'adminDashboardTitle'):`, error);
-     return {
+    console.error(
+      `[next-intl] Error using translations in generateMetadata for locale ${currentLocale} (AppHeader namespace, key 'adminDashboardTitle'):`,
+      error
+    );
+    return {
       title: 'Admin Dashboard (Translation Key Error)',
       description: 'Error using specific translation key in metadata.',
       icons: {
         icon: '/favicon.ico',
-      }
+      },
     };
   }
 }
 
 export default async function LocaleLayout({
   children,
-  params
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: {locale: string};
+  params: { locale: string };
 }>) {
-  const currentLocale = params.locale;
+  // Await params before using
+  const { locale: currentLocale } = await params;
 
   if (!locales.includes(currentLocale)) {
-    console.warn(`[next-intl] LocaleLayout: Invalid locale "${currentLocale}" from params. Calling notFound().`);
+    console.warn(
+      `[next-intl] LocaleLayout: Invalid locale "${currentLocale}" from params. Calling notFound().`
+    );
     notFound();
   }
 
   let messages;
   try {
-    console.log(`[next-intl] LocaleLayout: Attempting to get messages for locale ${currentLocale}.`);
-    messages = await getMessages();
-    console.log(`[next-intl] LocaleLayout: Successfully got messages for locale ${currentLocale}. Message keys: ${Object.keys(messages || {}).length > 0 ? Object.keys(messages).slice(0,5).join(', ') + '...' : 'No keys'}`);
+    console.log(
+      `[next-intl] LocaleLayout: Attempting to get messages for locale ${currentLocale}.`
+    );
+    // Pass locale to getMessages
+    messages = await getMessages({ locale: currentLocale });
+    console.log(
+      `[next-intl] LocaleLayout: Successfully got messages for locale ${currentLocale}. Message keys: ${
+        messages ? Object.keys(messages).slice(0, 5).join(', ') + '...' : 'No keys'
+      }`
+    );
   } catch (error) {
-    console.error(`[next-intl] Error in LocaleLayout for locale ${currentLocale} (getMessages):`, error);
+    console.error(
+      `[next-intl] Error in LocaleLayout for locale ${currentLocale} (getMessages):`,
+      error
+    );
     messages = {}; // Fallback to empty messages
   }
 
@@ -93,7 +118,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider locale={currentLocale} messages={messages}>
       <SidebarProvider defaultOpen>
         <AppSidebar messages={messages} locale={currentLocale} />
-        <div className="flex flex-col flex-1 min-h-screen">
+        <div className="flex flex-col flex-1 min-h-screen font-sans" style={{ fontFamily: 'var(--font-geist-sans)' }}>
           <AppHeader />
           <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
             {children}

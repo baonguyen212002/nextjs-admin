@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,16 +24,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname, Link } from '@/i18n/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
+// Validation schema
+type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
 const generalSettingsSchema = z.object({
   siteName: z.string().min(3, { message: 'Site name must be at least 3 characters.' }),
-  defaultLanguage: z.string({ required_error: 'Default language is required.' }),
-  timezone: z.string({ required_error: 'Timezone is required.' }),
+  defaultLanguage: z.string().nonempty({ message: 'Default language is required.' }),
+  timezone: z.string().nonempty({ message: 'Timezone is required.' }),
 });
 
-type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
-
+// Options
 const languages = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Español (Spanish)' },
@@ -73,76 +73,71 @@ const timezones = [
   { value: 'Pacific/Auckland', label: 'GMT+12:00 Auckland, Wellington' },
 ];
 
-
 export default function GeneralSettingsForm() {
   const t = useTranslations('GeneralSettingsForm');
   const { toast } = useToast();
   const router = useRouter();
-  const pathname = usePathname(); // Unlocalized pathname, e.g. /settings/general
-  const currentLocale = useLocale(); // Current active locale, e.g. 'en'
+  const pathname = usePathname();
+  const currentLocale = useLocale();
 
-  const baseSettings = {
-    siteName: t('siteNameLabel'), 
-    defaultLanguage: currentLocale, 
-    timezone: 'Etc/UTC',
-  };
-  
-  const [initialFormValues, setInitialFormValues] = useState(baseSettings);
+  // State to track loaded settings
+  const [loadedValues, setLoadedValues] = useState<GeneralSettingsFormValues | null>(null);
 
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedSiteName = localStorage.getItem('appSiteName');
-      const storedLanguage = localStorage.getItem('appLanguage') || currentLocale; 
-      const storedTimezone = localStorage.getItem('appTimezone');
-      
-      const loadedSettings = { 
-        siteName: storedSiteName || t('siteNameLabel'),
-        defaultLanguage: storedLanguage, 
-        timezone: storedTimezone || 'Etc/UTC',
-       };
-      setInitialFormValues(loadedSettings);
-    }
-  }, [currentLocale, t]);
-
+  // Initialize form hooks first to preserve hook order
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsSchema),
-    defaultValues: initialFormValues,
+    defaultValues: {
+      siteName: '',
+      defaultLanguage: currentLocale,
+      timezone: 'Etc/UTC',
+    },
   });
 
+  // Load saved settings from localStorage once
   useEffect(() => {
-    form.reset(initialFormValues);
-  }, [initialFormValues, form]);
+    const storedSiteName = localStorage.getItem('appSiteName') || '';
+    const storedLanguage = localStorage.getItem('appLanguage') || currentLocale;
+    const storedTimezone = localStorage.getItem('appTimezone') || 'Etc/UTC';
 
+    const values: GeneralSettingsFormValues = {
+      siteName: storedSiteName,
+      defaultLanguage: storedLanguage,
+      timezone: storedTimezone,
+    };
+
+    setLoadedValues(values);
+    form.reset(values);
+  }, [currentLocale, form]);
+
+  // Handler
   async function onSubmit(values: GeneralSettingsFormValues) {
-    console.log('General Settings Submitted:', values);
-    
-    let languageChanged = false;
-    if (typeof window !== 'undefined') {
-      if (localStorage.getItem('appLanguage') !== values.defaultLanguage) {
-        languageChanged = true;
-      }
-      localStorage.setItem('appSiteName', values.siteName);
-      localStorage.setItem('appLanguage', values.defaultLanguage);
-      localStorage.setItem('appTimezone', values.timezone);
-      window.dispatchEvent(new CustomEvent('settingsChanged', { detail: values }));
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const prevLang = localStorage.getItem('appLanguage');
+
+    localStorage.setItem('appSiteName', values.siteName);
+    localStorage.setItem('appLanguage', values.defaultLanguage);
+    localStorage.setItem('appTimezone', values.timezone);
+    window.dispatchEvent(new CustomEvent('settingsChanged', { detail: values }));
+
+    // simulate delay
+    await new Promise((r) => setTimeout(r, 1000));
 
     toast({
       title: t('settingsSavedToastTitle'),
       description: t('settingsSavedToastDescription'),
     });
 
-    if (languageChanged) {
-      router.push(pathname, {locale: values.defaultLanguage});
+    if (prevLang !== values.defaultLanguage) {
+      router.push(pathname, { locale: values.defaultLanguage });
     }
   }
+
+  // Show nothing (or loader) until values load and form reset
+  if (!loadedValues) return null;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Site Name */}
         <FormField
           control={form.control}
           name="siteName"
@@ -150,65 +145,69 @@ export default function GeneralSettingsForm() {
             <FormItem>
               <FormLabel>{t('siteNameLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder={t('siteNameLabel')} {...field} />
+                <Input {...field} placeholder={t('siteNameLabel')} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Default Language */}
         <FormField
           control={form.control}
           name="defaultLanguage"
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('defaultLanguageLabel')}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.defaultLanguage}>
-                <FormControl>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select default language" />
+                    <SelectValue />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Timezone */}
         <FormField
           control={form.control}
           name="timezone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('timezoneLabel')}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} defaultValue={initialFormValues.timezone}>
-                <FormControl>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select timezone" />
+                    <SelectValue />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {timezones.map((tz) => (
-                    <SelectItem key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {timezones.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Submit */}
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? (
-              <>{t('savingSettingsButton')}</>
-            ) : (
+            {form.formState.isSubmitting ? t('savingSettingsButton') : (
               <>
                 <Save className="mr-2 h-4 w-4" />
                 {t('saveSettingsButton')}

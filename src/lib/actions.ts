@@ -1,4 +1,3 @@
-
 'use server';
 
 import type { DataItem, User } from '@/types';
@@ -43,7 +42,7 @@ export async function createDataItem(formData: FormData) {
   }
 
   const newItem: DataItem = {
-    id: String(Date.now()), 
+    id: String(Date.now()),
     ...validatedFields.data,
     lastUpdated: new Date().toISOString(),
     imageUrl: `https://placehold.co/100x100.png?text=${validatedFields.data.name.substring(0,2)}`
@@ -87,18 +86,22 @@ export async function deleteDataItem(id: string) {
   return { message: 'Item deleted successfully!' };
 }
 
+// Upload Item Action Schema and Handler
 const uploadSchema = z.object({
-  itemName: z.string().min(3, "Item name must be at least 3 characters"),
+  itemName:        z.string().min(3, "Item name must be at least 3 characters"),
   itemDescription: z.string().optional(),
-  file: z.instanceof(File).refine(file => file.size > 0, "File is required")
-    .refine(file => file.size < 5 * 1024 * 1024, "File size should be less than 5MB"),
+  file: z.custom<Blob>((v): v is Blob => v instanceof Blob, {
+    message: "File is required",
+  })
+  .refine(blob => blob.size > 0, "File is required")
+  .refine(blob => blob.size < 5 * 1024 * 1024, "File size should be less than 5MB"),
 });
 
 export async function uploadItemAction(formData: FormData) {
   const validatedFields = uploadSchema.safeParse({
-    itemName: formData.get('itemName'),
+    itemName:        formData.get('itemName'),
     itemDescription: formData.get('itemDescription'),
-    file: formData.get('file'),
+    file:             formData.get('file'),
   });
 
   if (!validatedFields.success) {
@@ -109,25 +112,28 @@ export async function uploadItemAction(formData: FormData) {
   }
 
   const { itemName, itemDescription, file } = validatedFields.data;
-  console.log(`Uploading item: ${itemName}, File: ${file.name}, Size: ${file.size} bytes`);
+  console.log(`Uploading item: ${itemName}, Size: ${file.size} bytes`);
   await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+  // Convert Blob to Buffer for storage
+  const buffer = Buffer.from(await file.arrayBuffer());
+  // TODO: upload 'buffer' to your storage (e.g., S3)
 
   const newItem: DataItem = {
     id: String(Date.now()),
     name: itemName,
-    category: 'Uploaded', 
-    value: 0, 
+    category: 'Uploaded',
+    value: 0,
     status: 'pending',
     lastUpdated: new Date().toISOString(),
     description: itemDescription,
-    imageUrl: `https://placehold.co/300x200.png?text=${encodeURIComponent(itemName)}`, 
+    imageUrl: `https://placehold.co/300x200.png?text=${encodeURIComponent(itemName)}`,
   };
   mockData.unshift(newItem);
   revalidatePath('/manage-data');
   revalidatePath('/upload-items');
   revalidatePath('/[locale]/manage-data', 'layout');
   revalidatePath('/[locale]/upload-items', 'layout');
-
 
   return { message: `Item "${itemName}" uploaded successfully!`, item: newItem };
 }
@@ -141,9 +147,9 @@ let mockUsers: User[] = [
 ];
 
 const userSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  role: z.enum(['admin', 'editor', 'viewer'], { required_error: 'Role is required.' }),
+  name:   z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  email:  z.string().email({ message: 'Invalid email address.' }),
+  role:   z.enum(['admin', 'editor', 'viewer'], { required_error: 'Role is required.' }),
   status: z.enum(['active', 'invited', 'disabled'], { required_error: 'Status is required.' }),
 });
 
@@ -157,9 +163,9 @@ export async function fetchUsers(): Promise<User[]> {
 
 export async function createUserAction(formData: FormData) {
   const validatedFields = userSchema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    role: formData.get('role'),
+    name:   formData.get('name'),
+    email:  formData.get('email'),
+    role:   formData.get('role'),
     status: formData.get('status'),
   });
 
@@ -180,7 +186,7 @@ export async function createUserAction(formData: FormData) {
   const newUser: User = {
     id: `usr_${Date.now()}`,
     ...validatedFields.data,
-    lastLogin: new Date().toISOString(), // Or null/undefined if 'invited'
+    lastLogin: new Date().toISOString(),
     avatarUrl: `https://placehold.co/40x40.png?text=${validatedFields.data.name.substring(0,1)}`
   };
   mockUsers.unshift(newUser);
@@ -191,9 +197,9 @@ export async function createUserAction(formData: FormData) {
 
 export async function updateUserAction(id: string, formData: FormData) {
   const validatedFields = userSchema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    role: formData.get('role'),
+    name:   formData.get('name'),
+    email:  formData.get('email'),
+    role:   formData.get('role'),
     status: formData.get('status'),
   });
 
@@ -232,7 +238,6 @@ export async function deleteUserAction(id: string) {
 // Profile Update Action
 const profileUpdateSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  // Add other updatable profile fields here if needed, e.g., email with additional validation
 });
 
 export async function updateUserProfileAction(userId: string, formData: FormData) {
@@ -259,19 +264,12 @@ export async function updateUserProfileAction(userId: string, formData: FormData
   mockUsers[userIndex] = {
     ...mockUsers[userIndex],
     name: validatedFields.data.name,
-    // Potentially update other fields if they are part of the schema and form
   };
   
-  // Revalidate the profile page path for all locales
-  // Note: For App Router, revalidatePath('/settings/profile') might be enough
-  // if your page is not generating static params for locales.
-  // However, to be explicit for localized routes:
-  revalidatePath('/[locale]/settings/profile', 'page'); // 'page' revalidates data for the page
+  revalidatePath('/[locale]/settings/profile', 'page');
 
   return { 
     message: 'Profile updated successfully!', 
-    user: mockUsers[userIndex] // Return the updated user object
+    user: mockUsers[userIndex] 
   };
 }
-
-    
