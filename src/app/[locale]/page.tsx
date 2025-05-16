@@ -1,10 +1,11 @@
+
 import MetricCard from '@/components/dashboard/metric-card';
 import PersonalizedBanner from '@/components/shared/personalized-banner';
 import type { Metric } from '@/types';
 import { Users, Package, DollarSign, Activity, ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { Link } from 'next-intl/client';
+import { Link } from 'next-intl/client'; // Correct import for client components
 import { useTranslations } from 'next-intl';
 
 const metrics: Metric[] = [
@@ -26,7 +27,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PersonalizedBanner 
+      <PersonalizedBanner
         title={t('welcomeBannerTitle')}
         message={t('welcomeBannerMessage')}
       />
@@ -50,12 +51,12 @@ export default function DashboardPage() {
             <ul className="space-y-4">
               {recentActivities.map(activity => (
                 <li key={activity.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
-                  <Image 
-                    src={activity.userImage} 
-                    alt={activity.user} 
-                    width={40} 
-                    height={40} 
-                    className="rounded-full" 
+                  <Image
+                    src={activity.userImage}
+                    alt={activity.user}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
                     data-ai-hint={activity.userImageHint}
                   />
                   <div>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Link, usePathname } from 'next-intl/client'; // Using next-intl's Link and usePathname
+import { Link, usePathname, useRouter } from 'next-intl/navigation';
 import {
   LayoutDashboard,
   Database,

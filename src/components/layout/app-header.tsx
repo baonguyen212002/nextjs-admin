@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Link, usePathname, useRouter } from 'next-intl/client';
+import { Link, usePathname, useRouter } from 'next-intl/navigation';
 import { Bell, UserCircle, Sun, Moon, Menu, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
