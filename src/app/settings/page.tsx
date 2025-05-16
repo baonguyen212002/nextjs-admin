@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Users } from 'lucide-react';
+import { Settings, Users, Cog, Palette } from 'lucide-react';
 import Link from 'next/link';
 
 function QuickLinkButton({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
@@ -31,10 +31,13 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <QuickLinkButton href="/settings/general" label="General Settings" icon={Cog} />
           <QuickLinkButton href="/settings/users" label="User Management" icon={Users} />
+          <QuickLinkButton href="/settings/appearance" label="Appearance" icon={Palette} />
           {/* Add more settings links here as needed */}
         </CardContent>
       </Card>
     </div>
   );
 }
+
