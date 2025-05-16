@@ -1,5 +1,6 @@
+export const dynamic = 'force-dynamic';
 
-'use client'; // Mark as Client Component
+'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cog } from 'lucide-react';
@@ -27,4 +28,3 @@ export default function GeneralSettingsPage() {
     </div>
   );
 }
-
