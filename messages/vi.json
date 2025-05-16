@@ -80,5 +80,17 @@
     "changePasswordButton": "Đổi mật khẩu",
     "detailsCardTitle": "Chi tiết hồ sơ",
     "actionsCardTitle": "Hành động hồ sơ"
+  },
+  "ProfileEditForm": {
+    "dialogTitle": "Chỉnh sửa Hồ sơ",
+    "dialogDescription": "Thay đổi thông tin hồ sơ của bạn tại đây. Nhấp lưu khi hoàn tất.",
+    "saveButton": "Lưu thay đổi",
+    "savingButton": "Đang lưu...",
+    "cancelButton": "Hủy",
+    "updateSuccessTitle": "Hồ sơ đã được cập nhật!",
+    "updateErrorTitle": "Cập nhật thất bại",
+    "updateErrorMessage": "Không thể cập nhật hồ sơ. Vui lòng thử lại."
   }
 }
+
+    

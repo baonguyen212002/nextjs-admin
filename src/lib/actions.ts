@@ -50,6 +50,7 @@ export async function createDataItem(formData: FormData) {
   };
   mockData.unshift(newItem);
   revalidatePath('/manage-data');
+  revalidatePath('/[locale]/manage-data', 'layout');
   return { message: 'Item created successfully!', item: newItem };
 }
 
@@ -75,12 +76,14 @@ export async function updateDataItem(id: string, formData: FormData) {
   }
   mockData[index] = { ...mockData[index], ...validatedFields.data, lastUpdated: new Date().toISOString() };
   revalidatePath('/manage-data');
+  revalidatePath('/[locale]/manage-data', 'layout');
   return { message: 'Item updated successfully!', item: mockData[index] };
 }
 
 export async function deleteDataItem(id: string) {
   mockData = mockData.filter(item => item.id !== id);
   revalidatePath('/manage-data');
+  revalidatePath('/[locale]/manage-data', 'layout');
   return { message: 'Item deleted successfully!' };
 }
 
@@ -122,6 +125,9 @@ export async function uploadItemAction(formData: FormData) {
   mockData.unshift(newItem);
   revalidatePath('/manage-data');
   revalidatePath('/upload-items');
+  revalidatePath('/[locale]/manage-data', 'layout');
+  revalidatePath('/[locale]/upload-items', 'layout');
+
 
   return { message: `Item "${itemName}" uploaded successfully!`, item: newItem };
 }
@@ -179,6 +185,7 @@ export async function createUserAction(formData: FormData) {
   };
   mockUsers.unshift(newUser);
   revalidatePath('/settings/users');
+  revalidatePath('/[locale]/settings/users', 'layout');
   return { message: 'User created successfully!', user: newUser };
 }
 
@@ -211,11 +218,60 @@ export async function updateUserAction(id: string, formData: FormData) {
 
   mockUsers[index] = { ...mockUsers[index], ...validatedFields.data };
   revalidatePath('/settings/users');
+  revalidatePath('/[locale]/settings/users', 'layout');
   return { message: 'User updated successfully!', user: mockUsers[index] };
 }
 
 export async function deleteUserAction(id: string) {
   mockUsers = mockUsers.filter(user => user.id !== id);
   revalidatePath('/settings/users');
+  revalidatePath('/[locale]/settings/users', 'layout');
   return { message: 'User deleted successfully!' };
 }
+
+// Profile Update Action
+const profileUpdateSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  // Add other updatable profile fields here if needed, e.g., email with additional validation
+});
+
+export async function updateUserProfileAction(userId: string, formData: FormData) {
+  if (!userId) {
+    return { errors: { general: ['User ID is missing.'] }, message: 'Failed to update profile.' };
+  }
+
+  const validatedFields = profileUpdateSchema.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Failed to update profile. Please check the fields.',
+    };
+  }
+
+  const userIndex = mockUsers.findIndex(u => u.id === userId);
+  if (userIndex === -1) {
+    return { errors: { general: ['User not found.'] }, message: 'User not found.' };
+  }
+
+  mockUsers[userIndex] = {
+    ...mockUsers[userIndex],
+    name: validatedFields.data.name,
+    // Potentially update other fields if they are part of the schema and form
+  };
+  
+  // Revalidate the profile page path for all locales
+  // Note: For App Router, revalidatePath('/settings/profile') might be enough
+  // if your page is not generating static params for locales.
+  // However, to be explicit for localized routes:
+  revalidatePath('/[locale]/settings/profile', 'page'); // 'page' revalidates data for the page
+
+  return { 
+    message: 'Profile updated successfully!', 
+    user: mockUsers[userIndex] // Return the updated user object
+  };
+}
+
+    

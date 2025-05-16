@@ -5,13 +5,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
-import { Edit3, KeyRound, UserCircle, UserCog } from 'lucide-react';
+import { Edit3, KeyRound, UserCircle, UserCog, Save } from 'lucide-react';
 import Image from 'next/image';
-import { format } from 'date-fns'; // For formatting dates
+import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import type { User } from '@/types';
+import { updateUserProfileAction } from '@/lib/actions';
 
-// Mock user data - replace with actual data fetching logic
-const mockUser = {
+
+// Initial mock user data - this will be the starting point for our state
+const initialMockUser: User = {
+  id: 'usr_1', // Assuming this is the current logged-in user for demo
   name: 'Admin User',
   email: 'admin@example.com',
   avatarUrl: 'https://placehold.co/128x128.png',
@@ -20,8 +32,59 @@ const mockUser = {
   lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
 };
 
+const profileFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+});
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
+  const tForm = useTranslations('ProfileEditForm'); // Namespace for form translations
+  const { toast } = useToast();
+  const [currentUser, setCurrentUser] = useState<User>(initialMockUser);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: currentUser.name,
+    },
+  });
+
+  // Reset form when currentUser changes (e.g. after successful update or if dialog is reopened)
+  useEffect(() => {
+    form.reset({ name: currentUser.name });
+  }, [currentUser, form, isEditModalOpen]);
+
+
+  const handleEditProfileSubmit = async (values: ProfileFormValues) => {
+    setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    
+    const result = await updateUserProfileAction(currentUser.id, formData);
+    setIsSubmitting(false);
+
+    if (result.errors || !result.user) {
+      toast({
+        title: tForm('updateErrorTitle'),
+        description: result.message || tForm('updateErrorMessage'),
+        variant: 'destructive',
+      });
+      if (result.errors?.name) {
+        form.setError('name', { message: result.errors.name[0]});
+      }
+    } else {
+      toast({
+        title: tForm('updateSuccessTitle'),
+        description: result.message,
+      });
+      setCurrentUser(result.user); // Update local state with the returned user data
+      setIsEditModalOpen(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -38,14 +101,14 @@ export default function ProfilePage() {
             {/* Profile Avatar & Basic Info Section */}
             <div className="md:col-span-1 flex flex-col items-center space-y-4">
               <Avatar className="h-32 w-32 border-2 border-primary shadow-lg">
-                <AvatarImage src={mockUser.avatarUrl} alt={mockUser.name} data-ai-hint="person avatar" />
+                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="person avatar" />
                 <AvatarFallback>
                   <UserCircle className="h-20 w-20 text-muted-foreground" />
                 </AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <h2 className="text-2xl font-semibold text-foreground">{mockUser.name}</h2>
-                <p className="text-sm text-muted-foreground">{mockUser.email}</p>
+                <h2 className="text-2xl font-semibold text-foreground">{currentUser.name}</h2>
+                <p className="text-sm text-muted-foreground">{currentUser.email}</p>
               </div>
               <Button variant="outline" size="sm">
                 <Edit3 className="mr-2 h-4 w-4" />
@@ -62,28 +125,28 @@ export default function ProfilePage() {
                 <CardContent className="space-y-4">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-muted-foreground">{t('nameLabel')}</span>
-                    <span className="text-md text-foreground">{mockUser.name}</span>
+                    <span className="text-md text-foreground">{currentUser.name}</span>
                   </div>
                   <Separator />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-muted-foreground">{t('emailLabel')}</span>
-                    <span className="text-md text-foreground">{mockUser.email}</span>
+                    <span className="text-md text-foreground">{currentUser.email}</span>
                   </div>
                   <Separator />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-muted-foreground">{t('roleLabel')}</span>
-                    <span className="text-md text-foreground">{mockUser.role}</span>
+                    <span className="text-md text-foreground">{currentUser.role}</span>
                   </div>
                    <Separator />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-muted-foreground">{t('statusLabel')}</span>
-                    <span className="text-md text-foreground">{mockUser.status}</span>
+                    <span className="text-md text-foreground">{currentUser.status}</span>
                   </div>
                   <Separator />
                    <div className="flex flex-col">
                     <span className="text-sm font-medium text-muted-foreground">{t('lastLoginLabel')}</span>
                     <span className="text-md text-foreground">
-                      {format(new Date(mockUser.lastLogin), 'PPP p')}
+                      {format(new Date(currentUser.lastLogin), 'PPP p')}
                     </span>
                   </div>
                 </CardContent>
@@ -94,7 +157,7 @@ export default function ProfilePage() {
                   <CardTitle>{t('actionsCardTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-                  <Button variant="default">
+                  <Button variant="default" onClick={() => setIsEditModalOpen(true)}>
                     <Edit3 className="mr-2 h-4 w-4" />
                     {t('editProfileButton')}
                   </Button>
@@ -108,6 +171,53 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{tForm('dialogTitle')}</DialogTitle>
+            <DialogDescription>{tForm('dialogDescription')}</DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleEditProfileSubmit)} className="space-y-6 py-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('nameLabel')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t('nameLabel')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Add other editable fields here later, e.g., email */}
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">{tForm('cancelButton')}</Button>
+                </DialogClose>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Save className="mr-2 h-4 w-4 animate-spin" />
+                      {tForm('savingButton')}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      {tForm('saveButton')}
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+    

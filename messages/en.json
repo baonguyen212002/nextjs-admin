@@ -80,5 +80,17 @@
     "changePasswordButton": "Change Password",
     "detailsCardTitle": "Profile Details",
     "actionsCardTitle": "Profile Actions"
+  },
+  "ProfileEditForm": {
+    "dialogTitle": "Edit Profile",
+    "dialogDescription": "Make changes to your profile here. Click save when you're done.",
+    "saveButton": "Save Changes",
+    "savingButton": "Saving...",
+    "cancelButton": "Cancel",
+    "updateSuccessTitle": "Profile Updated!",
+    "updateErrorTitle": "Update Failed",
+    "updateErrorMessage": "Could not update profile. Please try again."
   }
 }
+
+    
