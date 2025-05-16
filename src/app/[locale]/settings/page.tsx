@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Cog, Palette } from 'lucide-react'; 
-import { Link } from 'next-intl/client'; // Use next-intl's Link
+import { Link } from 'next-intl/navigation'; // Use next-intl's Link
 import { useTranslations } from 'next-intl';
 
 

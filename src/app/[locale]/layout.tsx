@@ -2,25 +2,21 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import '../globals.css'; // Corrected path
-import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppHeader from '@/components/layout/app-header';
 import AppSidebar from '@/components/layout/app-sidebar';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
+import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
 
-// export const metadata: Metadata = { // Metadata can be generated dynamically too
-//   title: 'Admin Dashboard',
-//   description: 'Admin Dashboard for managing your application',
-// };
-
-export async function generateMetadata({params: {locale}}: {params: {locale: string}}) {
-  const t = await getTranslations({locale, namespace: 'AppHeader'});
+export async function generateMetadata({params}: {params: {locale: string}}) {
+  // Using params.locale directly as required by getTranslations
+  const t = await getTranslations({locale: params.locale, namespace: 'AppHeader'});
  
   return {
     title: t('adminDashboardTitle'),
@@ -30,19 +26,20 @@ export async function generateMetadata({params: {locale}}: {params: {locale: str
 
 export default async function RootLayout({
   children,
-  params: {locale}
+  params
 }: Readonly<{
   children: React.ReactNode;
   params: {locale: string};
 }>) {
+  // getMessages infers locale from the request context set up by middleware
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={params.locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={params.locale} messages={messages}>
           <SidebarProvider defaultOpen>
-            <AppSidebar />
+            <AppSidebar messages={messages} locale={params.locale} /> {/* Pass messages and locale here */}
             <div className="flex flex-col flex-1 min-h-screen">
               <AppHeader />
               <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
@@ -50,8 +47,8 @@ export default async function RootLayout({
               </main>
             </div>
           </SidebarProvider>
-          <Toaster />
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
-
 'use client';
 
-import { Link, usePathname, useRouter } from 'next-intl/navigation';
+import Link from 'next/link';
+import { usePathname as useNextPathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Database,
@@ -22,54 +22,82 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { NextIntlClientProvider, useTranslations } from 'next-intl';
 
-export default function AppSidebar() {
-  const pathname = usePathname(); // This will be the path without the locale, e.g., /dashboard
-  const t = useTranslations('AppSidebar');
+export default function AppSidebar({ messages, locale }) {
+  // Fallback an toàn
+  if (!messages || !locale) {
+    console.error('Missing messages or locale in AppSidebar');
+    return null;
+  }
+
+  const nextPathname = useNextPathname();
+
+  // Loại bỏ prefix locale khỏi path
+  const removeLocaleFromPathname = (path, loc) => {
+    const localePrefix = `/${loc}`;
+    return path.startsWith(localePrefix) ? path.slice(localePrefix.length) || '/' : path;
+  };
+
+  const pathname = removeLocaleFromPathname(nextPathname, locale);
 
   const navItems = [
-    { href: '/', label: t('dashboard'), icon: LayoutDashboard },
-    { href: '/manage-data', label: t('manageData'), icon: Database },
-    { href: '/upload-items', label: t('uploadItems'), icon: UploadCloud },
-    { href: '/settings/users', label: t('userManagement'), icon: Users },
+    { href: '/', labelKey: 'dashboard', icon: LayoutDashboard },
+    { href: '/manage-data', labelKey: 'manageData', icon: Database },
+    { href: '/upload-items', labelKey: 'uploadItems', icon: UploadCloud },
+    { href: '/settings/users', labelKey: 'userManagement', icon: Users },
   ];
-  
+
   const bottomNavItems = [
-    { href: '/settings', label: t('settings'), icon: Settings },
-    { href: '/support', label: t('support'), icon: LifeBuoy },
+    { href: '/settings', labelKey: 'settings', icon: Settings },
+    { href: '/support', labelKey: 'support', icon: LifeBuoy },
   ];
+
+  const localizeHref = (href) => `/${locale}${href === '/' ? '' : href}`;
+
+  return (
+    <NextIntlClientProvider messages={messages} locale={locale}>
+      <AppSidebarContent
+        navItems={navItems}
+        bottomNavItems={bottomNavItems}
+        pathname={pathname}
+        localizeHref={localizeHref}
+      />
+    </NextIntlClientProvider>
+  );
+}
+
+function AppSidebarContent({ navItems, bottomNavItems, pathname, localizeHref }) {
+  const t = useTranslations('AppSidebar');
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        {/* Optional: Logo or App Name can go here if not in header for collapsed state */}
+        {/* Optional logo or app name */}
       </SidebarHeader>
       <SidebarContent className="flex-grow">
         <SidebarMenu>
           {navItems.map((item) => {
-             // For active state, pathname from next-intl/client doesn't include locale.
-            // So, '/settings/users' will match if item.href is '/settings/users'.
-            const isUserManagementLink = item.href === '/settings/users';
-            const isLinkActive = isUserManagementLink
-              ? pathname.startsWith(item.href) 
-              : pathname === item.href;
+            const isUserManagement = item.href === '/settings/users';
+            const isActive = isUserManagement ? pathname.startsWith(item.href) : pathname === item.href;
 
             return (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} passHref legacyBehavior={false}>
+                <Link href={localizeHref(item.href)}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isLinkActive}
-                    tooltip={{ children: item.label, side: 'right', align: 'center' }}
+                    isActive={isActive}
+                    tooltip={{ children: t(item.labelKey), side: 'right', align: 'center' }}
                     className={cn(
                       'w-full justify-start',
-                      isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      isActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
                     )}
                   >
-                    <> {/* Ensure SidebarMenuButton receives a single child when asChild is true */}
+                    <>
                       <item.icon className="h-5 w-5" />
-                      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {t(item.labelKey)}
+                      </span>
                     </>
                   </SidebarMenuButton>
                 </Link>
@@ -82,47 +110,52 @@ export default function AppSidebar() {
         <SidebarSeparator />
         <SidebarMenu>
           {bottomNavItems.map((item) => {
-            const isSettingsLink = item.href === '/settings';
-             // pathname from next-intl/client is unlocalized
-            const isLinkActive = isSettingsLink
-              ? (pathname === item.href || (pathname.startsWith(item.href + '/') && !pathname.startsWith('/settings/users')))
-              : pathname === item.href; 
+            const isSettings = item.href === '/settings';
+            const isActive = isSettings
+              ? (pathname === item.href ||
+                  (pathname.startsWith(item.href + '/') && !pathname.startsWith('/settings/users')))
+              : pathname === item.href;
 
             return (
-               <SidebarMenuItem key={item.href}>
-                 <Link href={item.href} passHref legacyBehavior={false}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isLinkActive}
-                      tooltip={{ children: item.label, side: 'right', align: 'center' }}
-                      className={cn(
-                        'w-full justify-start',
-                        isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      )}
-                    >
-                      <>
-                        <item.icon className="h-5 w-5" />
-                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                      </>
-                    </SidebarMenuButton>
-                 </Link>
-               </SidebarMenuItem>
+              <SidebarMenuItem key={item.href}>
+                <Link href={localizeHref(item.href)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    tooltip={{ children: t(item.labelKey), side: 'right', align: 'center' }}
+                    className={cn(
+                      'w-full justify-start',
+                      isActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    )}
+                  >
+                    <>
+                      <item.icon className="h-5 w-5" />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {t(item.labelKey)}
+                      </span>
+                    </>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
             );
           })}
+
           <SidebarMenuItem>
-             <Link href="/logout" passHref legacyBehavior={false}> {/* Assuming /logout is not a localized route or handled differently */}
-                <SidebarMenuButton
-                  asChild
-                  tooltip={{ children: t('logout'), side: 'right', align: 'center' }}
-                  className="w-full justify-start hover:bg-destructive/20"
-                >
-                  <>
-                    <Power className="h-5 w-5 text-destructive" />
-                    <span className="group-data-[collapsible=icon]:hidden text-destructive">{t('logout')}</span>
-                  </>
-                </SidebarMenuButton>
-             </Link>
-           </SidebarMenuItem>
+            <Link href={localizeHref('/logout')}>
+              <SidebarMenuButton
+                asChild
+                tooltip={{ children: t('logout'), side: 'right', align: 'center' }}
+                className="w-full justify-start hover:bg-destructive/20"
+              >
+                <>
+                  <Power className="h-5 w-5 text-destructive" />
+                  <span className="group-data-[collapsible=icon]:hidden text-destructive">
+                    {t('logout')}
+                  </span>
+                </>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

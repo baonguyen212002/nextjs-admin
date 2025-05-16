@@ -5,7 +5,7 @@ import type { Metric } from '@/types';
 import { Users, Package, DollarSign, Activity, ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { Link } from 'next-intl/client'; // Correct import for client components
+import { Link } from 'next-intl/navigation'; // Correct import for client components
 import { useTranslations } from 'next-intl';
 
 const metrics: Metric[] = [
