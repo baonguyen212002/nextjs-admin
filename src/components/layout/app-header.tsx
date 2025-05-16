@@ -1,7 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Bell, UserCircle, Sun, Moon, Menu } from 'lucide-react';
+import { Bell, UserCircle, Sun, Moon, Menu, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'; // useSidebar for mobile toggle
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'; 
 import { useEffect, useState } from 'react';
 
 // A mock theme toggle - in a real app, this would integrate with a theme provider (e.g., next-themes)
@@ -50,6 +51,34 @@ const ThemeToggle = () => {
   );
 };
 
+const LiveClock = () => {
+  const [currentTime, setCurrentTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    setCurrentTime(new Date().toLocaleTimeString()); // Initial set
+    return () => clearInterval(timer);
+  }, []);
+
+  if (currentTime === null) {
+    return (
+      <div className="flex items-center text-sm text-muted-foreground">
+        <Clock className="mr-1 h-4 w-4" />
+        <span>--:--:--</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center text-sm font-medium text-foreground">
+      <Clock className="mr-1 h-4 w-4 text-accent" />
+      <span>{currentTime}</span>
+    </div>
+  );
+};
+
 
 export default function AppHeader() {
   const { isMobile } = useSidebar();
@@ -63,6 +92,7 @@ export default function AppHeader() {
         </Link>
       </div>
       <div className="flex items-center gap-3">
+        <LiveClock />
         <ThemeToggle />
         <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5 text-accent" />
