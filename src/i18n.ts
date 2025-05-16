@@ -6,10 +6,10 @@ import {notFound} from 'next/navigation';
 const locales = ['en', 'vi'];
 
 // Minimal messages defined directly in the file for diagnostics
-const messagesData: Record<string, any> = {
+const messagesData = {
   en: {
     AppHeader: {
-      adminDashboardTitle: "Admin Dashboard (EN Config)",
+      adminDashboardTitle: "Admin Dashboard (EN Embedded)",
       notificationsLabel: "Notifications (EN)",
       userMenuLabel: "User menu (EN)",
       myAccountDropdown: "My Account (EN)",
@@ -18,7 +18,7 @@ const messagesData: Record<string, any> = {
       logoutDropdown: "Logout (EN)",
       liveClockLoading: "Loading time... (EN)"
     },
-    AppSidebar: { // Add keys for AppSidebar as it uses useTranslations
+    AppSidebar: {
       dashboard: "Dashboard (EN)",
       manageData: "Manage Data (EN)",
       uploadItems: "Upload Items (EN)",
@@ -28,8 +28,8 @@ const messagesData: Record<string, any> = {
       logout: "Logout (EN)",
       toggleSidebarTooltip: "Toggle Sidebar (EN)"
     },
-    DashboardPage: { // Add keys for DashboardPage
-        welcomeBannerTitle: "Welcome Back, Admin! (EN Config)",
+    DashboardPage: {
+        welcomeBannerTitle: "Welcome Back, Admin! (EN Embedded)",
         welcomeBannerMessage: "Here's a summary of recent activity. (EN)",
         recentActivitiesTitle: "Recent Activities (EN)",
         recentActivitiesDescription: "What's been happening in the system. (EN)",
@@ -40,7 +40,6 @@ const messagesData: Record<string, any> = {
         userManagementLink: "User Management (EN)",
         viewReportsLink: "View Reports (EN)"
     },
-    // Add other namespaces and keys as used by your components
     GeneralSettingsForm: {
         siteNameLabel: "Site Name (EN)",
         defaultLanguageLabel: "Default Language (EN)",
@@ -75,7 +74,7 @@ const messagesData: Record<string, any> = {
   },
   vi: {
     AppHeader: {
-      adminDashboardTitle: "Trang quản trị (VI Config)",
+      adminDashboardTitle: "Trang quản trị (VI Embedded)",
       notificationsLabel: "Thông báo (VI)",
       userMenuLabel: "Menu người dùng (VI)",
       myAccountDropdown: "Tài khoản của tôi (VI)",
@@ -95,7 +94,7 @@ const messagesData: Record<string, any> = {
       toggleSidebarTooltip: "Chuyển đổi thanh bên (VI)"
     },
     DashboardPage: {
-        welcomeBannerTitle: "Chào mừng trở lại, Quản trị viên! (VI Config)",
+        welcomeBannerTitle: "Chào mừng trở lại, Quản trị viên! (VI Embedded)",
         welcomeBannerMessage: "Đây là bản tóm tắt hoạt động gần đây. (VI)",
         recentActivitiesTitle: "Hoạt động gần đây (VI)",
         recentActivitiesDescription: "Những gì đã xảy ra trong hệ thống. (VI)",
@@ -144,15 +143,15 @@ export default getRequestConfig(async ({locale}) => {
   console.log(`[next-intl] i18n.ts: Request received for locale "${locale}".`);
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) {
-    console.warn(`[next-intl] i18n.ts: Invalid locale "${locale}" received. Calling notFound().`);
+    console.warn(`[next-intl] i18n.ts: Invalid locale "${locale}" received from getRequestConfig. Calling notFound().`);
     notFound();
   }
 
-  const localeMessages = messagesData[locale];
+  const localeMessages = messagesData[locale as keyof typeof messagesData];
 
   if (!localeMessages) {
     // This should ideally not be reached if the above validation works.
-    console.error(`[next-intl] i18n.ts: CRITICAL - No messages found for locale "${locale}" in messagesData. This should not happen. Calling notFound().`);
+    console.error(`[next-intl] i18n.ts: CRITICAL - No messages found for locale "${locale}" in embedded messagesData. This should not happen. Calling notFound().`);
     notFound();
   }
   

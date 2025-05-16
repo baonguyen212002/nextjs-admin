@@ -22,7 +22,7 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
 
   if (!locales.includes(currentLocale)) {
     console.warn(`[next-intl] generateMetadata: Invalid locale "${currentLocale}" from params. Calling notFound().`);
-    notFound(); // Call notFound for invalid locales
+    notFound(); 
   }
 
   let t;
@@ -36,23 +36,22 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
     return {
       title: 'Admin Dashboard (Translation Config Error)',
       description: 'Error loading translations for metadata due to config issue.',
-      icons: { // Add favicon here as well for consistency
+      icons: { 
         icon: '/favicon.ico',
       }
     };
   }
 
   try {
-    const pageTitle = t('adminDashboardTitle'); // Key from messagesData.en.AppHeader
+    const pageTitle = t('adminDashboardTitle'); 
     return {
       title: pageTitle,
-      description: pageTitle, // Re-using for simplicity
+      description: pageTitle, 
       icons: {
         icon: '/favicon.ico',
       }
     };
   } catch (error) {
-     // This catch block might be hit if the specific key (e.g., 'adminDashboardTitle') is missing
      console.error(`[next-intl] Error using translations in generateMetadata for locale ${currentLocale} (AppHeader namespace, key 'adminDashboardTitle'):`, error);
      return {
       title: 'Admin Dashboard (Translation Key Error)',
@@ -75,21 +74,20 @@ export default async function LocaleLayout({
 
   if (!locales.includes(currentLocale)) {
     console.warn(`[next-intl] LocaleLayout: Invalid locale "${currentLocale}" from params. Calling notFound().`);
-    notFound(); // Call notFound for invalid locales
+    notFound(); 
   }
 
   let messages;
   try {
     console.log(`[next-intl] LocaleLayout: Attempting to get messages for locale ${currentLocale}.`);
-    messages = await getMessages(); // Gets all messages for the currentLocale
+    messages = await getMessages(); 
     console.log(`[next-intl] LocaleLayout: Successfully got messages for locale ${currentLocale}. Message keys: ${Object.keys(messages || {}).join(', ')}`);
   } catch (error) {
-    // This is a critical error if next-intl config isn't found.
-    console.error(`[next-intl] Critical Error in LocaleLayout for locale ${currentLocale} (getMessages):`, error);
+    console.error(`[next-intl] Error in LocaleLayout for locale ${currentLocale} (getMessages):`, error);
+    // This is a critical error if next-intl config isn't found or message loading fails.
     // Fallback to empty messages to allow the rest of the page to attempt rendering,
     // but this indicates a fundamental problem with next-intl setup.
-    messages = {}; // Provide empty messages to prevent NextIntlClientProvider from crashing
-                    // but the UI will likely be broken or show default/missing translations.
+    messages = {}; 
   }
 
   return (
@@ -97,7 +95,6 @@ export default async function LocaleLayout({
       <body className={`${geistSans.variable} antialiased`}>
         <NextIntlClientProvider locale={currentLocale} messages={messages}>
           <SidebarProvider defaultOpen>
-            {/* AppSidebar expects all messages for the locale to function correctly */}
             <AppSidebar messages={messages} locale={currentLocale} />
             <div className="flex flex-col flex-1 min-h-screen">
               <AppHeader />
