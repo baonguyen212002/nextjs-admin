@@ -21,14 +21,14 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
-} from '@/components/ui/sidebar'; 
+} from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/manage-data', label: 'Manage Data', icon: Database },
   { href: '/upload-items', label: 'Upload Items', icon: UploadCloud },
-  { href: '/settings/users', label: 'User Management', icon: Users }, // Added User Management link
+  { href: '/settings/users', label: 'User Management', icon: Users },
 ];
 
 const bottomNavItems = [
@@ -47,51 +47,65 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex-grow">
         <SidebarMenu>
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.href || (item.href === '/settings/users' && pathname.startsWith('/settings/users'))}
-                  tooltip={{ children: item.label, side: 'right', align: 'center' }}
-                  className={cn(
-                    'w-full justify-start',
-                    (pathname === item.href || (item.href === '/settings/users' && pathname.startsWith('/settings/users'))) && 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  )}
-                >
-                  <a>
-                    <item.icon className="h-5 w-5" />
-                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        <SidebarMenu>
-          {bottomNavItems.map((item) => (
-             <SidebarMenuItem key={item.href}>
-               <Link href={item.href} legacyBehavior passHref>
+          {navItems.map((item) => {
+            const isUserManagementLink = item.href === '/settings/users';
+            const isLinkActive = isUserManagementLink
+              ? pathname.startsWith(item.href) // Active if path starts with /settings/users
+              : pathname === item.href;      // Active if path is an exact match for other items
+
+            return (
+              <SidebarMenuItem key={item.href}>
+                <Link href={item.href} legacyBehavior passHref>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings'))}
+                    isActive={isLinkActive}
                     tooltip={{ children: item.label, side: 'right', align: 'center' }}
                     className={cn(
-                    'w-full justify-start',
-                    (pathname === item.href || (item.href === '/settings' && pathname.startsWith('/settings') && !pathname.startsWith('/settings/users'))) && 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  )}
+                      'w-full justify-start',
+                      isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    )}
                   >
                     <a>
                       <item.icon className="h-5 w-5" />
                       <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                     </a>
                   </SidebarMenuButton>
-               </Link>
-             </SidebarMenuItem>
-          ))}
+                </Link>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarSeparator />
+        <SidebarMenu>
+          {bottomNavItems.map((item) => {
+            const isSettingsLink = item.href === '/settings';
+            const isLinkActive = isSettingsLink
+              ? (pathname === item.href || (pathname.startsWith(item.href) && !pathname.startsWith('/settings/users')))
+              : pathname === item.href; // Exact match for other items like /support
+
+            return (
+               <SidebarMenuItem key={item.href}>
+                 <Link href={item.href} legacyBehavior passHref>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isLinkActive}
+                      tooltip={{ children: item.label, side: 'right', align: 'center' }}
+                      className={cn(
+                        'w-full justify-start',
+                        isLinkActive && 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      )}
+                    >
+                      <a>
+                        <item.icon className="h-5 w-5" />
+                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                 </Link>
+               </SidebarMenuItem>
+            );
+          })}
           <SidebarMenuItem>
              <Link href="/logout" legacyBehavior passHref>
                 <SidebarMenuButton
