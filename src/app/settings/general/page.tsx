@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cog } from 'lucide-react';
+import GeneralSettingsForm from '@/components/settings/general-settings-form';
 
 export default function GeneralSettingsPage() {
   return (
@@ -16,17 +17,7 @@ export default function GeneralSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              This is where you would configure general application parameters. 
-              For example, you could set the application's name, default language,
-              timezone, or other global preferences.
-            </p>
-            {/* Placeholder for actual form fields */}
-            <div className="p-8 border rounded-md bg-muted/50 text-center text-muted-foreground">
-              General settings form fields will go here.
-            </div>
-          </div>
+          <GeneralSettingsForm />
         </CardContent>
       </Card>
     </div>
