@@ -37,9 +37,9 @@ const generalSettingsSchema = z.object({
 // Options
 const languages = [
   { value: 'en', label: 'English' },
-  { value: 'es', label: 'Español (Spanish)' },
-  { value: 'fr', label: 'Français (French)' },
-  { value: 'de', label: 'Deutsch (German)' },
+  // { value: 'es', label: 'Español (Spanish)' },
+  // { value: 'fr', label: 'Français (French)' },
+  // { value: 'de', label: 'Deutsch (German)' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)' },
 ];
 
